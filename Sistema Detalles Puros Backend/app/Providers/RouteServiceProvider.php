@@ -8,52 +8,31 @@ use Illuminate\Support\Facades\Route;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * Este es el espacio de nombres aplicado a los controladores de rutas.
+     * El espacio de nombres para las rutas.
      *
-     * @var string|null
+     * @var string
      */
-    protected $namespace = 'App\Http\Controllers';
+    protected $namespace = '';
 
     /**
-     * Define la ruta de inicio para autenticación de usuarios.
-     */
-    public const HOME = '/home';
-
-    /**
-     * Boot para registrar rutas y otros ajustes.
-     */
-    public function boot()
-    {
-        parent::boot();
-    }
-
-    /**
-     * Define las rutas de la aplicación.
+     * Registrar los servicios de rutas.
+     *
+     * @return void
      */
     public function map()
     {
-        $this->mapApiRoutes();
         $this->mapWebRoutes();
     }
 
     /**
-     * Define las rutas de la API.
-     */
-    protected function mapApiRoutes()
-    {
-        Route::prefix('api') // Prefijo para las rutas de API
-            ->middleware('api') // Middleware para la API
-            ->namespace($this->namespace) // Espacio de nombres
-            ->group(base_path('routes/api.php')); // Archivo de rutas API
-    }
-
-    /**
-     * Define las rutas web.
+     * Registrar las rutas web para la aplicación.
+     *
+     * @return void
      */
     protected function mapWebRoutes()
     {
-        Route::middleware('web') // Middleware para las rutas web
+        Route::middleware('web')
             ->namespace($this->namespace)
-            ->group(base_path('routes/web.php')); // Archivo de rutas web
+            ->group(base_path('routes/web.php'));
     }
 }
