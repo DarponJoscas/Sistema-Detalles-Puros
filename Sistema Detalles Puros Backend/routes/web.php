@@ -1,17 +1,10 @@
 <?php
 
-use App\Http\Livewire\Auth\Login;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Usuarios;
+use App\Livewire\Admin\Dashboard;
 
-Route::get('/login', Login::class)->name('login')->middleware('guest');
-Route::get('/welcome', function () {
-    return view('welcome');
-})->middleware('auth')->name('welcome');
+// Ruta para el login
+Route::get('/login', Usuarios::class)->name('login');
 
-// Ruta para cerrar sesión
-Route::post('/logout', function () {
-    Auth::logout();
-    session()->invalidate();
-    session()->regenerateToken();
-    return redirect()->route('login');
-})->name('logout');
+Route::get('/dashboard', Dashboard::class)->name('dashboard');
