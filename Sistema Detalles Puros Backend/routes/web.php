@@ -6,5 +6,5 @@ use App\Livewire\Admin\Dashboard;
 
 // Ruta para el login
 Route::get('/login', Usuarios::class)->name('login');
-
+Route::get('/register', Usuarios::class)->name('register');  
 Route::get('/dashboard', Dashboard::class)->name('dashboard');

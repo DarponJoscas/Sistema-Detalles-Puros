@@ -6,56 +6,75 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Usuario;
-use Log;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class Usuarios extends Component
 {
-    public $usuario;
-    public $contrasena_usuario;
+    #[Reactive] 
+    public $usuario = '';
 
-    protected $rules = [
-        'usuario' => 'required|string',
-        'contrasena_usuario' => 'required|min:8',
-    ];
+    #[Reactive] 
+    public $contrasena_usuario = '';
 
     public function login()
     {
-        // Registro del intento de inicio de sesión
-        Log::info('Intento de inicio de sesión', ['usuario' => $this->usuario]);
+        $validated = $this->validate([
+            'usuario' => 'required|string',
+            'contrasena_usuario' => 'required|min:8',
+        ]);
 
-        // Validación de datos
-        $this->validate();
-
-        // Verificación de existencia de usuario
         $user = Usuario::where('name_usuario', $this->usuario)->first();
 
-        if ($user) {
-            Log::info('Usuario encontrado', ['usuario' => $this->usuario]);
-
-            // Validación de estado activo del usuario
-            if ($user->estado_usuario == 0) {
-                Log::warning('Usuario inactivo', ['usuario' => $this->usuario]);
-                session()->flash('error', 'El usuario está inactivo.');
-                return;
-            }
-
-            // Verificación de contraseña
-            if (Hash::check($this->contrasena_usuario, $user->password)) {
-                Log::info('Contraseña correcta', ['usuario' => $this->usuario]);
-
-                // Autenticación del usuario
-                Auth::login($user);
-
-                // Redirección a dashboard sin generar un token JWT
-                session()->flash('mensaje', 'Bienvenido, ' . $user->name_usuario);
-                return redirect()->route('dashboard');
-            } else {
-                Log::warning('Contraseña incorrecta', ['usuario' => $this->usuario]);
-                session()->flash('error', 'Las credenciales no son correctas');
-            }
-        } else {
+        if (!$user) {
             Log::warning('Usuario no encontrado', ['usuario' => $this->usuario]);
-            session()->flash('error', 'Las credenciales no son correctas');
+            $this->addError('usuario', 'Las credenciales no son correctas.');
+            return;
+        }
+
+        if ($user->estado_usuario == 0) {
+            Log::warning('Usuario inactivo', ['usuario' => $this->usuario]);
+            $this->addError('usuario', 'El usuario está inactivo.');
+            return;
+        }
+
+        if (!Hash::check($this->contrasena_usuario, $user->password)) {
+            Log::warning('Contraseña incorrecta', ['usuario' => $this->usuario]);
+            $this->addError('contrasena_usuario', 'Las credenciales no son correctas.');
+            return;
+        }
+
+        Auth::login($user);
+
+        session()->flash('mensaje', 'Bienvenido, ' . $user->name_usuario);
+        return redirect()->route('dashboard');
+    }
+
+    public function register()
+    {
+        $validated = $this->validate([
+            'usuario' => 'required|string|unique:usuarios,name_usuario',
+            'contrasena_usuario' => 'required|min:8',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            Usuario::create([
+                'name_usuario' => $this->usuario,
+                'password' => Hash::make($this->contrasena_usuario),
+                'estado_usuario' => 1,
+                'id_rol' => 1,
+            ]);
+
+            DB::commit();
+
+            session()->flash('mensaje', 'Usuario registrado con éxito. Inicia sesión.');
+            return redirect()->route('login');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al registrar el usuario: ' . $e->getMessage());
+            session()->flash('error', 'Hubo un problema al registrar el usuario.');
         }
     }
 
@@ -64,4 +83,3 @@ class Usuarios extends Component
         return view('livewire.usuarios')->layout('layouts.app');
     }
 }
-
