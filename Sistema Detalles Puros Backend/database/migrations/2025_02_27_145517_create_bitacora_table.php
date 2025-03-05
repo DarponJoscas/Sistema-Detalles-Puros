@@ -14,10 +14,10 @@ class CreateBitacoraTable extends Migration
     public function up()
     {
         Schema::create('bitacora', function (Blueprint $table) {
-            $table->id(); // crea una columna 'id' con autoincremento
-            $table->string('descripcion'); // columna para la descripción
-            $table->foreignId('usuario_id')->constrained('usuarios','id_usuario'); // clave foránea a la tabla 'usuarios'
-            $table->timestamps(); // crea las columnas created_at y updated_at
+            $table->id('id_bitacora');
+            $table->string('descripcion');
+            $table->foreignId('id_usuario')->constrained('usuarios','id_usuario');
+            $table->timestamps();
         });
     }
 

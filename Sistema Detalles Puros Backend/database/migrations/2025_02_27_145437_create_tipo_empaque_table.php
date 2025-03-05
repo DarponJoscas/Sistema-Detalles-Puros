@@ -4,17 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateClientesTable extends Migration
+class CreateTipoEmpaqueTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('clientes', function (Blueprint $table) {
-            $table->id('id_cliente');
-            $table->string('name_cliente', 50)->nullable();
-            $table->boolean('estado_cliente')->default(1);
+        Schema::create('tipo_empaque', function (Blueprint $table) {
+            $table->id('id_empaque');
+            $table->string('tipo_empaque', 50);
+            $table->boolean('estado_empaque');
             $table->timestamps(0);
         });
     }
@@ -24,6 +24,6 @@ class CreateClientesTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('clientes');
+        Schema::dropIfExists('tipo_empaque');
     }
-};
+}

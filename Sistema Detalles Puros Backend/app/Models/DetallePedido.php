@@ -2,34 +2,59 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * App\Models\DetallePedido
+ * Class DetallePedido
  *
  * @property int $id_pedido
  * @property int $id_puro
- * @property string $descripcion_produccion
+ * @property int $id_cliente
+ * @property int|null $id_empaque
+ * @property string|null $descripcion_produccion
  * @property string|null $imagen_produccion
- * @property string $descripcion_empaque
- * @property string|null $imagen_anillado
- * @property string|null $imagen_caja
- * @property int $cantidad_caja
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $estado_pedido
+ * @property string|null $created_at
+ * @property string|null $updated_at
  *
- * @property-read \App\Models\InfoPuro $infoPuro
+ * @property-read \App\Models\Cliente $cliente
+ * @property-read \App\Models\InfoPuro $puro
+ * @property-read \App\Models\Empaque|null $empaque
  */
-
 class DetallePedido extends Model
 {
+    use HasFactory;
+
     protected $table = 'detalle_pedido';
+
     protected $primaryKey = 'id_pedido';
-    protected $fillable = ['id_puro', 'descripcion_produccion', 'imagen_produccion', 'descripcion_empaque', 'imagen_anillado', 'imagen_caja', 'cantidad_caja'];
+
+    protected $fillable = [
+        'id_puro',
+        'id_cliente',
+        'id_empaque',
+        'descripcion_produccion',
+        'imagen_produccion',
+        'estado_pedido',
+        'created_at',
+        'updated_at',
+    ];
+
     public $timestamps = true;
 
-    public function infoPuro()
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class, 'id_cliente');
+    }
+
+    public function puro()
     {
         return $this->belongsTo(InfoPuro::class, 'id_puro');
+    }
+
+    public function empaque()
+    {
+        return $this->belongsTo(Empaque::class, 'id_empaque');
     }
 }

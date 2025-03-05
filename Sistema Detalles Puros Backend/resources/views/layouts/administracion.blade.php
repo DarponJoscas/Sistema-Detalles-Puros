@@ -134,21 +134,6 @@
                     </li>
                 @endif
 
-                @if (!in_array(request()->path(), ['empaque']))
-                    <li class="nav-item">
-                        <form action="{{ route('empaque') }}" method="GET">
-                            <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Empaque</button>
-                        </form>
-                    </li>
-                @endif
-
-                @if (!in_array(request()->path(), ['produccion']))
-                    <li class="nav-item">
-                        <form action="{{ route('produccion') }}" method="GET">
-                            <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Producción</button>
-                        </form>
-                    </li>
-                @endif
                 <li class="nav-item">
                     <form action="{{ route('registrarusuario') }}" method="GET">
                         <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Registrar Usuario</button>
@@ -210,5 +195,4 @@
         }
     </script>
 </body>
-
 </html>

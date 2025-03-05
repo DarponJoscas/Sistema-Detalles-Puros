@@ -1,141 +1,264 @@
-
 <div>
-<style>
-                    #login {
-                        background: rgb(0, 0, 0);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                    }
-                    #login .form-container {
-                        background: #ecf0f3;
-                        font-family: 'Nunito', sans-serif;
-                        padding: 30px;
-                        border-radius: 20px;
-                        text-align: center;
-                        max-width: 300px;
-                        width: 100%;
-                    }
-                    #login .form-icon {
-                        background-color: rgb(0, 0, 0);
-                        width: 100px;
-                        height: 100px;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        border-radius: 50%;
-                        box-shadow: 7px 7px 10px #cbced1, -7px -7px 10px #fff;
-                        overflow: hidden;
-                        margin: 0 auto 15px;
-                    }
-                    #login .form-icon img {
-                        width: 90%;
-                        height: auto;
-                        object-fit: contain;
-                    }
-                    #login .title {
-                        color: rgb(2, 0, 2);
-                        font-size: 22px;
-                        font-weight: 700;
-                        text-transform: uppercase;
-                        letter-spacing: 1px;
-                        margin-bottom: 20px;
-                    }
-                    #login .form-group {
-                        margin-bottom: 15px;
-                        text-align: left;
-                    }
-                    #login label {
-                        font-size: 14px;
-                        font-weight: 600;
-                        text-transform: uppercase;
-                        display: block;
-                    }
-                    #login .form-control {
-                        color: #333;
-                        background: #ecf0f3;
-                        font-size: 14px;
-                        height: 30px;
-                        padding: 10px;
-                        border: none;
-                        border-radius: 25px;
-                        box-shadow: inset 4px 4px 6px #cbced1, inset -4px -4px 6px #fff;
-                        width: 93%;
-                    }
-                    #login .form-control:focus {
-                        outline: none;
-                        box-shadow: inset 4px 4px 6px #cbced1, inset -4px -4px 6px #fff;
-                    }
-                    #login .btn {
-                        color: #fff;
-                        background-color: rgb(10, 10, 10);
-                        font-size: 14px;
-                        font-weight: bold;
-                        text-transform: uppercase;
-                        width: 100%;
-                        padding: 10px;
-                        border-radius: 20px;
-                        box-shadow: 4px 4px 6px #cbced1, -4px -4px 6px #fff;
-                        border: none;
-                        transition: all 0.4s ease;
-                    }
-                    #login .btn:hover {
-                        letter-spacing: 1px;
-                    }
-                    .error-message {
-                        color: #dc3545;
-                        font-size: 12px;
-                        margin-top: 5px;
-                    }
-                    .register-link {
-                        margin-top: 15px;
-                        text-align: center;
-                    }
-                    /* Estilos para el modal */
-                    .modal-content {
-                        background: #ecf0f3;
-                        border-radius: 20px;
-                    }
-                    .modal-body .form-control {
-                        background: #ecf0f3;
-                        border: none;
-                        border-radius: 25px;
-                        box-shadow: inset 4px 4px 6px #cbced1, inset -4px -4px 6px #fff;
-                        padding: 10px;
-                    }
-                    .modal-header {
-                        border-bottom: none;
-                    }
-                    .modal-footer {
-                        border-top: none;
-                    }
-                </style>
+    <style>
+        #login {
+            background: rgb(0, 0, 0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #login .form-container {
+            background: #ecf0f3;
+            font-family: 'Nunito', sans-serif;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        #login .form-icon {
+            background-color: rgb(0, 0, 0);
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            box-shadow: 7px 7px 10px #cbced1, -7px -7px 10px #fff;
+            overflow: hidden;
+            margin: 0 auto 15px;
+        }
+
+        #login .form-icon img {
+            width: 90%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        #login .title {
+            color: rgb(2, 0, 2);
+            font-size: 22px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        #login .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        #login label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        #login .form-control {
+            color: #333;
+            background: #ecf0f3;
+            font-size: 14px;
+            height: 30px;
+            padding: 10px;
+            border: none;
+            border-radius: 25px;
+            box-shadow: inset 4px 4px 6px #cbced1, inset -4px -4px 6px #fff;
+            width: 93%;
+        }
+
+        #login .form-control:focus {
+            outline: none;
+            box-shadow: inset 4px 4px 6px #cbced1, inset -4px -4px 6px #fff;
+        }
+
+        #login .btn {
+            color: #fff;
+            background-color: rgb(10, 10, 10);
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            width: 100%;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 4px 4px 6px #cbced1, -4px -4px 6px #fff;
+            border: none;
+            transition: all 0.4s ease;
+        }
+
+        #login .btn:hover {
+            letter-spacing: 1px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
     <div id="login">
         <div class="form-container">
             <div class="form-icon">
                 <img src="{{ asset('images/plasencia.png') }}" alt="Logo">
             </div>
             <h2 class="title">Iniciar Sesión</h2>
-            <form wire:submit="login">
+            <form wire:submit.prevent="login">
                 <div class="form-group">
                     <label for="usuario">Usuario:</label>
-                    <input type="text" wire:model.defer="usuario" id="usuario" class="form-control" placeholder="Ingrese su usuario">
-                    @error('usuario') <span class="error-message">{{ $message }}</span> @enderror
+                    <input type="text" wire:model="usuario" id="usuario" class="form-control"
+                        placeholder="Ingrese su usuario">
+                    @error('usuario')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="contrasena_usuario">Contraseña:</label>
-                    <input type="password" wire:model.defer="contrasena_usuario" id="contrasena_usuario" class="form-control" placeholder="Ingrese su contraseña">
-                    @error('contrasena_usuario') <span class="error-message">{{ $message }}</span> @enderror
+                    <input type="password" wire:model="contrasena_usuario" id="contrasena_usuario" class="form-control"
+                        placeholder="Ingrese su contraseña">
+                    @error('contrasena_usuario')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                @if (session()->has('error'))
-                    <p class="error-message text-center">{{ session('error') }}</p>
+                @if ($error_message)
+                    <p class="error-message text-center">{{ $error_message }}</p>
+                @endif
+
+                @if ($success_message)
+                    <p class="success-message text-center">{{ $success_message }}</p>
                 @endif
 
                 <button type="submit" class="btn">Ingresar</button>
             </form>
         </div>
     </div>
+@elseif(request()->is('registrarusuario'))
+    <!-- Modal de registro de usuario -->
+    <div class="modal fade" id="registrarusuarioModal" tabindex="-1" aria-labelledby="exampleModalLabel" wire:ignore>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Crear Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group mb-3">
+                            <label for="register-usuario">Usuario:</label>
+                            <input type="text" wire:model="usuario" id="register-usuario" class="form-control"
+                                placeholder="Ingrese su usuario">
+                            @error('usuario')
+                                <span class="error-message text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="register-contrasena">Contraseña:</label>
+                            <input type="text" wire:model="contrasena_usuario" id="register-contrasena"
+                                class="form-control" placeholder="Ingrese su contraseña">
+                            @error('contrasena_usuario')
+                                <span class="error-message text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="register-rol">Rol de Usuario:</label>
+                            <select wire:model="id_rol" id="register-rol" class="form-control">
+                                <option value="" placeholder="seleccione un rol"></option>
+                                @foreach ($roles as $rol)
+                                    <option value="{{ $rol->id_rol }}">{{ $rol->rol }}</option>
+                                @endforeach
+                            </select>
+                            @error('id_rol')
+                                <span class="error-message text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        @if ($error_message)
+                            <p class="error-message text-center">{{ $error_message }}</p>
+                        @endif
+
+                        @if ($success_message)
+                            <p class="success-message text-center">{{ $success_message }}</p>
+                        @endif
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" wire:click="register">Guardar Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de actualizar un usuario -->
+    <div class="modal fade" id="actualizarusuarioModal" tabindex="-1" aria-labelledby="exampleModalLabel" wire:ignore>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Actualizar Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group mb-3">
+                            <label for="register-usuario">Usuario:</label>
+                            <input type="text" wire:model="usuario" id="register-usuario" class="form-control"
+                                placeholder="Ingrese su usuario">
+                            @error('usuario')
+                                <span class="error-message text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="register-contrasena">Contraseña:</label>
+                            <input type="text" wire:model="contrasena_usuario" id="register-contrasena"
+                                class="form-control" placeholder="Ingrese su contraseña">
+                            @error('contrasena_usuario')
+                                <span class="error-message text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="register-rol">Rol de Usuario:</label>
+                            <select wire:model="id_rol" id="register-rol" class="form-control">
+                                <option value="">Seleccione un rol</option>
+                                @foreach ($roles as $rol)
+                                    <option value="{{ $rol->id_rol }}">{{ $rol->rol }}</option>
+                                @endforeach
+                            </select>
+                            @error('id_rol')
+                                <span class="error-message text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        @if ($error_message)
+                            <p class="error-message text-center">{{ $error_message }}</p>
+                        @endif
+
+                        @if ($success_message)
+                            <p class="success-message text-center">{{ $success_message }}</p>
+                        @endif
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" wire:click="register">Guardar Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 </div>

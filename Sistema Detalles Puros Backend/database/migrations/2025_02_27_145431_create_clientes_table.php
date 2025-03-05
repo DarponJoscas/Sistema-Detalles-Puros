@@ -4,17 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePresentacionesTable extends Migration
+class CreateClientesTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('presentaciones', function (Blueprint $table) {
-            $table->id('id_presentacion');
-            $table->string('name_presentacion', 100);
-            $table->boolean('estado_presentacion')->default(1);
+        Schema::create('clientes', function (Blueprint $table) {
+            $table->id('id_cliente');
+            $table->string('name_cliente', 50)->nullable();
+            $table->boolean('estado_cliente')->default(1);
             $table->timestamps(0);
         });
     }
@@ -24,6 +24,6 @@ class CreatePresentacionesTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('presentaciones');
+        Schema::dropIfExists('clientes');
     }
-};
+}
