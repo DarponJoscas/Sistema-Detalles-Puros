@@ -4,9 +4,17 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\InfoPuro;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\WithPagination;
 
 class InfoPuros extends Component
 {
+    public $estadoPuro = null;
+    public $perPage = 10;
+    protected $paginationTheme = 'bootstrap';
+    use WithPagination;
+
     public $presentacion_puro, $marca_puro, $alias_vitola, $vitola, $capa_puro, $codigo_puro;
     public $presentaciones = [], $marcas = [], $alias_vitolas = [], $vitolas = [], $capas = [];
 
@@ -29,7 +37,6 @@ class InfoPuros extends Component
             $this->filterOptions();
         }
 
-        // Validar en tiempo real el código de puro
         if ($propertyName === 'codigo_puro') {
             $this->validateOnly('codigo_puro');
         }
@@ -61,14 +68,60 @@ class InfoPuros extends Component
             'vitola' => $this->vitola,
             'capa_puro' => $this->capa_puro,
             'codigo_puro' => $this->codigo_puro,
+            'estado_puro' => 1
         ]);
 
         session()->flash('message', 'Puro registrado correctamente.');
         $this->reset();
     }
 
+    public function getDatosPuros()
+    {
+        $results = DB::select("CALL GetPuros(?)", [$this->estadoPuro]);
+
+        $collection = collect($results)->map(function ($row) {
+            return [
+                'codigo_puro' => $row->codigo_puro ?? '',
+                'presentacion_puro' => $row->presentacion_puro ?? '',
+                'marca_puro' => $row->marca_puro ?? '',
+                'vitola' => $row->vitola ?? '',
+                'alias_vitola' => $row->alias_vitola ?? '',
+                'capa_puro' => $row->capa_puro ?? '',
+                'estado_puro' => $row->estado_puro ?? '',
+            ];
+        });
+
+        $maxRecords = $collection->count();
+        $currentPage = $this->getPage();
+        $items = $collection->forPage($currentPage, $this->perPage)->values();
+
+        return new LengthAwarePaginator(
+            $items,
+            $maxRecords,
+            $this->perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+    }
+
+    public function eliminarPuros($codigo_puro)
+    {
+        $registro = InfoPuro::find($codigo_puro);
+
+        if ($registro) {
+            $registro->estado_pedido = 0;
+            $registro->save();
+
+            session()->flash('message', 'Registro desactivado correctamente.');
+        } else {
+            session()->flash('error', 'Registro no encontrado.');
+        }
+    }
+
     public function render()
     {
-        return view('livewire.info-puros')->extends('layouts.app')->section('content');
+        return view('livewire.info-puros', [
+            'datosPaginados' => $this->getDatosPuros(),
+        ])->extends('layouts.app')->section('content');
     }
 }

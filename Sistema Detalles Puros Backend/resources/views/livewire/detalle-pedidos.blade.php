@@ -1,121 +1,119 @@
 <div class="d-inline-block m-3">
-
+    <div>
         <div>
-            <div>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                    data-bs-target="#registrarpedidoempaqueModal">
-                    Registrar Nuevo Pedido
-                </button>
-                <button class="btn btn-success" wire:click="filtrarPedidos(1)">Pedidos Activos</button>
-                <button class="btn btn-danger" wire:click="filtrarPedidos(0)">Pedidos Inactivos</button>
-                <button class="btn btn-secondary" wire:click="filtrarPedidos(null)">Mostrar Todos</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#registrarpedidoempaqueModal">
+                Registrar Nuevo Pedido
+            </button>
+            <button class="btn btn-success" wire:click="filtrarPedidos(1)">Pedidos Activos</button>
+            <button class="btn btn-danger" wire:click="filtrarPedidos(0)">Pedidos Inactivos</button>
+            <button class="btn btn-secondary" wire:click="filtrarPedidos(null)">Mostrar Todos</button>
+        </div>
+
+        @if (session()->has('message'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('message') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        @endif
 
-            @if (session()->has('message'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('message') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
+        @if (session()->has('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
-            @if (session()->has('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
-            <!-- Vista para mostrar los registros de Pedido-->
-            <div class="table-responsive text-center">
-                <table class="table mt-3 mx-auto text-center align-middle">
-                    <thead class="text-center">
+        <!-- Vista para mostrar los registros de Pedido-->
+        <div class="table-responsive text-center">
+            <table class="table mt-3 mx-auto text-center align-middle">
+                <thead class="text-center">
+                    <tr>
+                        <th>N° Pedido</th>
+                        <th>Cliente</th>
+                        <th>Código Puro</th>
+                        <th>Presentación Puro</th>
+                        <th>Marca Puro</th>
+                        <th>Alias Vitola</th>
+                        <th>Vitola</th>
+                        <th>Capa Puro</th>
+                        <th>Descripción Producción</th>
+                        <th>Imagen Producción</th>
+                        <th>Código Ítem</th>
+                        <th>Tipo Empaque</th>
+                        <th>Descripción Empaque</th>
+                        <th>Imagen Anillado</th>
+                        <th>Imagen Caja</th>
+                        <th>Cantidad Caja</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @foreach ($datosPaginados as $dato)
                         <tr>
-                            <th>N° Pedido</th>
-                            <th>Cliente</th>
-                            <th>Código Puro</th>
-                            <th>Presentación Puro</th>
-                            <th>Marca Puro</th>
-                            <th>Alias Vitola</th>
-                            <th>Vitola</th>
-                            <th>Capa Puro</th>
-                            <th>Descripción Producción</th>
-                            <th>Imagen Producción</th>
-                            <th>Código Ítem</th>
-                            <th>Tipo Empaque</th>
-                            <th>Descripción Empaque</th>
-                            <th>Imagen Anillado</th>
-                            <th>Imagen Caja</th>
-                            <th>Cantidad Caja</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center">
-                        @foreach ($datosPaginados as $dato)
-                            <tr>
-                                <td>{{ $dato['id_pedido'] }}</td>
-                                <td>{{ $dato['cliente'] }}</td>
-                                <td>{{ $dato['codigo_puro'] }}</td>
-                                <td>{{ $dato['presentacion_puro'] }}</td>
-                                <td>{{ $dato['marca_puro'] }}</td>
-                                <td>{{ $dato['alias_vitola'] }}</td>
-                                <td>{{ $dato['vitola'] }}</td>
-                                <td>{{ $dato['capa_puro'] }}</td>
-                                <td>{{ $dato['descripcion_produccion'] }}</td>
-                                <td>
-                                    @if ($dato['imagen_produccion'])
-                                        <img src="{{ asset('storage/' . $dato['imagen_produccion']) }}"
-                                            alt="Imagen Producción" width="100" height="100"
-                                            class="d-block mx-auto rounded">
-                                    @else
-                                        <span class="text-muted">Sin Imagen</span>
-                                    @endif
-                                </td>
-                                <td>{{ $dato['codigo_empaque'] }}</td>
-                                <td>{{ $dato['tipo_empaque'] }}</td>
-                                <td>{{ $dato['descripcion_empaque'] }}</td>
-                                <td>
-                                    @if ($dato['imagen_anillado'])
-                                        <img src="{{ asset('storage/' . $dato['imagen_anillado']) }}"
-                                            alt="Imagen Anillado" width="100" height="100"
-                                            class="d-block mx-auto rounded">
-                                    @else
-                                        <span class="text-muted">Sin Imagen</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($dato['imagen_caja'])
-                                        <img src="{{ asset('storage/' . $dato['imagen_caja']) }}" alt="Imagen Caja"
-                                            width="100" height="100" class="d-block mx-auto rounded">
-                                    @else
-                                        <span class="text-muted">Sin Imagen</span>
-                                    @endif
-                                </td>
-                                <td>{{ $dato['cantidad_caja'] }}</td>
-                                <td>
+                            <td>{{ $dato['id_pedido'] }}</td>
+                            <td>{{ $dato['cliente'] }}</td>
+                            <td>{{ $dato['codigo_puro'] }}</td>
+                            <td>{{ $dato['presentacion_puro'] }}</td>
+                            <td>{{ $dato['marca_puro'] }}</td>
+                            <td>{{ $dato['alias_vitola'] }}</td>
+                            <td>{{ $dato['vitola'] }}</td>
+                            <td>{{ $dato['capa_puro'] }}</td>
+                            <td>{{ $dato['descripcion_produccion'] }}</td>
+                            <td>
+                                @if ($dato['imagen_produccion'])
+                                    <img src="{{ asset('storage/' . $dato['imagen_produccion']) }}"
+                                        alt="Imagen Producción" width="100" height="100"
+                                        class="d-block mx-auto rounded">
+                                @else
+                                    <span class="text-muted">Sin Imagen</span>
+                                @endif
+                            </td>
+                            <td>{{ $dato['codigo_empaque'] }}</td>
+                            <td>{{ $dato['tipo_empaque'] }}</td>
+                            <td>{{ $dato['descripcion_empaque'] }}</td>
+                            <td>
+                                @if ($dato['imagen_anillado'])
+                                    <img src="{{ asset('storage/' . $dato['imagen_anillado']) }}" alt="Imagen Anillado"
+                                        width="100" height="100" class="d-block mx-auto rounded">
+                                @else
+                                    <span class="text-muted">Sin Imagen</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($dato['imagen_caja'])
+                                    <img src="{{ asset('storage/' . $dato['imagen_caja']) }}" alt="Imagen Caja"
+                                        width="100" height="100" class="d-block mx-auto rounded">
+                                @else
+                                    <span class="text-muted">Sin Imagen</span>
+                                @endif
+                            </td>
+                            <td>{{ $dato['cantidad_caja'] }}</td>
+                            <td>
 
 
 
-            </div>
-            <div class="d-inline-block m-1">
-                <button type="button" class="btn btn-warning" wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
+        </div>
+        <div class="d-inline-block m-1">
+            <button type="button" class="btn btn-warning" wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
                 <i class="bi bi-pencil-square"></i>
             </button>
-            </div>
-            <div class="d-inline-block m-1">
-                <button type="button" class="btn btn-danger" wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-            </td>
-            </tr>
-    @endforeach
-    </tbody>
-    </table>
+        </div>
+        <div class="d-inline-block m-1">
+            <button type="button" class="btn btn-danger" wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        </td>
+        </tr>
+        @endforeach
+        </tbody>
+        </table>
 
-    <div class="mt-4">
-        {{ $datosPaginados->links() }}
+        <div class="mt-4">
+            {{ $datosPaginados->links() }}
+        </div>
     </div>
-</div>
 </div>
 
 <!-- Modal de Registro de Pedido-->
@@ -173,7 +171,8 @@
 
                     <div class="form-group mb-3">
                         <label for="alias_vitola">Alias de la Vitola:</label>
-                        <input type="text" wire:model="alias_vitola" id="alias_vitola" class="form-control" readonly>
+                        <input type="text" wire:model="alias_vitola" id="alias_vitola" class="form-control"
+                            readonly>
                     </div>
 
                     <div class="form-group mb-3">
@@ -188,7 +187,8 @@
 
                     <div class="form-group mb-3">
                         <label for="descripcion_produccion">Descripción Produccion:</label>
-                        <input type="text" wire:model="descripcion_produccion" id="descripcion_produccion" class="form-control">
+                        <input type="text" wire:model="descripcion_produccion" id="descripcion_produccion"
+                            class="form-control">
                     </div>
 
                     <div class="form-group mb-3">
