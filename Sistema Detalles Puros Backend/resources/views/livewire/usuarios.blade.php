@@ -142,7 +142,7 @@
             </form>
         </div>
     </div>
-@elseif(request()->is('registrarusuario'))
+
     <!-- Modal de registro de usuario -->
     <div class="modal fade" id="registrarusuarioModal" tabindex="-1" aria-labelledby="exampleModalLabel" wire:ignore>
         <div class="modal-dialog">

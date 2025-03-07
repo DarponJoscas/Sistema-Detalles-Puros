@@ -24,8 +24,6 @@ class DetallePedidos extends Component
     public $id_pedido;
 
     public $id_cliente;
-    public $id_puro;
-    public $id_empaque;
     public $descripcion_produccion;
     public $imagen_produccion;
     public $descripcion_empaque;
@@ -42,6 +40,7 @@ class DetallePedidos extends Component
     public $cantidad_caja;
     public $codigo_empaque;
     public $tipo_empaque;
+    public $codigo_pedido;
 
     public $clientes = [];
     public $puros = [];
@@ -57,7 +56,7 @@ class DetallePedidos extends Component
         'imagen_anillado' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'imagen_caja' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'cantidad_caja' => 'nullable|integer|min:1',
-        'id_puro' => 'required|integer|exists:info_puro,id_puro',
+        'codigo_puro' => 'required|string|exists:info_puro,codigo_puro',
         'id_cliente' => 'required|integer|exists:clientes,id_cliente',
         'descripcion_produccion' => 'nullable|string|max:255',
         'imagen_produccion' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -67,7 +66,8 @@ class DetallePedidos extends Component
     {
         $this->id_pedido = $id_pedido;
         $this->clientes = DB::table('clientes')->get(['id_cliente', 'name_cliente']);
-        $this->puros = DB::table('info_puro')->get(['id_puro', 'codigo_puro']);
+        $this->puros = DB::table('info_puro')->get(['codigo_puro', 'codigo_puro']);
+        DetallePedido::select(['codigo_empaque'])->distinct()->get();
 
         if ($id_pedido) {
             $this->cargaredidos($id_pedido);
@@ -84,7 +84,7 @@ class DetallePedidos extends Component
                     'alias_vitola',
                     'vitola',
                     'capa_puro',
-                    'id_puro'
+                    'codigo_puro'
                 ]);
                 $this->error_puro = null;
                 return;
@@ -93,7 +93,7 @@ class DetallePedidos extends Component
             $puro = DB::table('info_puro')->where('codigo_puro', trim($this->codigo_puro))->first();
 
             if ($puro) {
-                $this->id_puro = $puro->id_puro;
+                $this->codigo_puro = $puro->codigo_puro;
                 $this->presentacion_puro = $puro->presentacion_puro ?? '';
                 $this->marca_puro = $puro->marca_puro ?? '';
                 $this->alias_vitola = $puro->alias_vitola ?? '';
@@ -107,7 +107,7 @@ class DetallePedidos extends Component
                     'alias_vitola',
                     'vitola',
                     'capa_puro',
-                    'id_puro'
+                    'codigo_puro'
                 ]);
                 $this->error_puro = 'Código de puro no encontrado.';
                 Log::error('Código de puro no encontrado', ['codigo_puro' => $this->codigo_puro]);
@@ -124,7 +124,7 @@ class DetallePedidos extends Component
                 'alias_vitola',
                 'vitola',
                 'capa_puro',
-                'id_puro'
+                'codigo_puro'
             ]);
         }
     }
@@ -150,7 +150,6 @@ class DetallePedidos extends Component
                 'capa_puro' => $row->capa_puro ?? '',
                 'descripcion_produccion' => $row->descripcion_produccion ?? '',
                 'imagen_produccion' => $row->imagen_produccion ?? '',
-                'id_empaque' => $row->id_empaque ?? '',
                 'codigo_empaque' => $row->codigo_empaque ?? '',
                 'tipo_empaque' => $row->tipo_empaque ?? '',
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',
@@ -174,15 +173,14 @@ class DetallePedidos extends Component
         );
     }
 
-
-
     public function crearDetallePedidoYEmpaque()
     {
+
         $this->validate();
 
         DB::statement('CALL InsertarDetallePedidoYEmpaque(?,?,?,?,?,?,?,?,?,?)', [
             $this->id_cliente,
-            $this->id_puro,
+            $this->codigo_puro,
             $this->descripcion_produccion,
             $this->imagen_produccion,
             $this->codigo_empaque,
@@ -195,7 +193,7 @@ class DetallePedidos extends Component
 
         $this->reset([
             'id_cliente',
-            'id_puro',
+            'codigo_puro',
             'descripcion_produccion',
             'imagen_produccion',
             'codigo_empaque',
@@ -206,7 +204,8 @@ class DetallePedidos extends Component
             'cantidad_caja'
         ]);
 
-        session()->flash('message', 'Usuario insertado correctamente.');
+        session()->flash('message', 'Pedido insertado correctamente.');
+        $this->render();
     }
 
     public function eliminarDetallePedido($id_pedido)
@@ -218,6 +217,20 @@ class DetallePedidos extends Component
             $registro->save();
 
             session()->flash('message', 'Registro desactivado correctamente.');
+        } else {
+            session()->flash('error', 'Registro no encontrado.');
+        }
+    }
+
+    public function activarDetallePedido($id_pedido)
+    {
+        $registro = DetallePedido::find($id_pedido);
+
+        if ($registro) {
+            $registro->estado_pedido = 1;
+            $registro->save();
+
+            session()->flash('message', 'Registro activado correctamente.');
         } else {
             session()->flash('error', 'Registro no encontrado.');
         }

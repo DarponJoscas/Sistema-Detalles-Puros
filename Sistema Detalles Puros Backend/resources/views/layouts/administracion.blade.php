@@ -134,6 +134,15 @@
                     </li>
                 @endif
 
+                @if (!in_array(request()->path(), ['puros']))
+                    <li class="nav-item">
+                        <form action="{{ route('puros') }}" method="GET">
+
+                            <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Registro Puros</button>
+                        </form>
+                    </li>
+                @endif
+
                 <li class="nav-item">
                     <form action="{{ route('registrarusuario') }}" method="GET">
                         <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Registrar Usuario</button>
@@ -154,7 +163,6 @@
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/js/tom-select.complete.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 

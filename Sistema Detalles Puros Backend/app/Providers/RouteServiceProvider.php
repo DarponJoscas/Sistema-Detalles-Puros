@@ -24,14 +24,14 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            // Rutas de API
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
-
-            // Rutas Web
+            // Rutas Web (Livewire usa estas rutas)
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+
+            // ❌ Si NO usas API, comenta o elimina esto
+            // Route::middleware('api')
+            //     ->prefix('api')
+            //     ->group(base_path('routes/api.php'));
         });
     }
 

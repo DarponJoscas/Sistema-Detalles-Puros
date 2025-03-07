@@ -51,7 +51,8 @@
                 <tbody class="text-center">
                     @foreach ($datosPaginados as $dato)
                         <tr>
-                            <td>{{ $dato['id_pedido'] }}</td>
+                            <td style="display: none;">{{ $dato['id_pedido'] }}</td>
+                            <td>{{ ($datosPaginados->currentPage() - 1) * $datosPaginados->perPage() + $loop->iteration  }}</td>
                             <td>{{ $dato['cliente'] }}</td>
                             <td>{{ $dato['codigo_puro'] }}</td>
                             <td>{{ $dato['presentacion_puro'] }}</td>

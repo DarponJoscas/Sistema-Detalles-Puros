@@ -21,7 +21,7 @@ class InfoPuro extends Model
     use HasFactory;
 
     protected $table = 'info_puro';
-    protected $primaryKey = 'id_puro';
+    protected $primaryKey = 'codigo_puro';
 
     protected $fillable = [
         'presentacion_puro',
@@ -30,6 +30,7 @@ class InfoPuro extends Model
         'vitola',
         'capa_puro',
         'codigo_puro',
+        'estado_puro',
     ];
 
     public $timestamps = true;
