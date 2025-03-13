@@ -12,12 +12,12 @@ use App\Livewire\Roles;
 Route::get('/login', Usuarios::class)->name('login');
 Route::post('/logout', [Usuarios::class, 'logout'])->name('logout');
 
-
 Route::get('/dashboard', Dashboards::class)->name('dashboard');
+Route::get('/produccion', DetallePedidos::class)->name('produccion');
+Route::get('/empaque', DetallePedidos::class)->name('empaque');
 Route::get('/administracion', DetallePedidos::class)->name('administracion');
 
-
-Route::get('/registrarcliente', Cliente::class)->name('registrarcliente');
+Route::get('/usuarios', Usuarios::class)->name('usuarios');
 Route::get('/registrarusuario', Usuarios::class)->name('registrarusuario');
 Route::get('/puros', InfoPuros::class)->name('puros');
 Route::get('/createrol', Roles::class)->name('createrol');
@@ -27,4 +27,3 @@ Route::get('/actualizarusuario', Usuarios::class)->name('actualizarusuario');
 
 
 Route::get('/updaterol', Usuarios::class)->name('updaterol');
-

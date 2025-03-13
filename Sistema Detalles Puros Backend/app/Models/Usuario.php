@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+
 /**
  * @property int $id_usuario
  * @property string $name_usuario
@@ -14,7 +16,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  */
 class Usuario extends Authenticatable implements JWTSubject
 {
-    use Notifiable;
+    use Notifiable, HasFactory;
 
     protected $table = 'usuarios';
     protected $primaryKey = 'id_usuario';
@@ -49,5 +51,11 @@ class Usuario extends Authenticatable implements JWTSubject
     public function getUserName()
     {
         return $this->name_usuario;
+    }
+
+
+    public function rol()
+    {
+        return $this->belongsTo(Rol::class, 'id_rol');
     }
 }

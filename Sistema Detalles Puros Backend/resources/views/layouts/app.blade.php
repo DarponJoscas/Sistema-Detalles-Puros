@@ -19,7 +19,7 @@
             left: -250px;
             width: 250px;
             height: 100vh;
-            background-color: #343a40;
+            background-color: #000000;
             color: white;
             padding: 20px;
             transition: left 0.3s ease;
@@ -45,7 +45,7 @@
         }
 
         #navbar {
-            background-color: #343a40;
+            background-color: #000000;
             padding: 5px 15px;
             height: 30px;
             width: 100%;
@@ -106,49 +106,84 @@
 
 <body>
     @if (!in_array(request()->path(), ['login', 'dashboard']))
-    <div id="navbar-content" class="navbar-content">
+        <div id="navbar-content" class="navbar-content">
 
-        <nav id="navbar" class="navbar navbar-expand-lg">
-            <button id="hamburger" aria-label="Menú"><i class="fas fa-bars"></i></button>
-        </nav>
+            <nav id="navbar" class="navbar navbar-expand-lg">
+                <button id="hamburger" aria-label="Menú"><i class="fas fa-bars"></i></button>
+            </nav>
 
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-        <nav id="sidebar">
-            <button id="closeSidebar" aria-label="Cerrar menú">&times;</button>
-            <h4>Menú</h4>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <form action="{{ route('dashboard') }}" method="GET">
-
-                        <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Inicio</button>
-                    </form>
-                </li>
-
-                @if (!in_array(request()->path(), ['administracion']))
+            <nav id="sidebar">
+                <button id="closeSidebar" aria-label="Cerrar menú">&times;</button>
+                <h4>Menú</h4>
+                <ul class="nav flex-column">
                     <li class="nav-item">
-                        <form action="{{ route('administracion') }}" method="GET">
+                        <form action="{{ route('dashboard') }}" method="GET">
 
-                            <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Administración</button>
+                            <button type="submit" class="nav-link btn btn-link"
+                                style="color: white; text-decoration: none;">Inicio</button>
                         </form>
                     </li>
-                @endif
+
+                    @if (!in_array(request()->path(), ['administracion']))
+                        <li class="nav-item">
+                            <form action="{{ route('administracion') }}" method="GET">
+
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Administración</button>
+                            </form>
+                        </li>
+                    @endif
 
 
-                <li class="nav-item">
-                    <form action="{{ route('registrarusuario') }}" method="GET">
-                        <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Registrar Usuario</button>
-                    </form>
-                </li>
-                <li class="nav-item">
-                    <form action="{{ route('logout') }}" method="POST">
-                        <button type="submit" class="nav-link btn btn-link" style="color: white; text-decoration: none;">Cerrar sesión</button>
-                    </form>
-                </li>
-            </ul>
-        </nav>
-    </div>
-@endif
+                    @if (!in_array(request()->path(), ['empaque']))
+                        <li class="nav-item">
+                            <form action="{{ route('empaque') }}" method="GET">
+
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Empaque</button>
+                            </form>
+                        </li>
+                    @endif
+
+                    @if (!in_array(request()->path(), ['produccion']))
+                        <li class="nav-item">
+                            <form action="{{ route('produccion') }}" method="GET">
+
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Producción</button>
+                            </form>
+                        </li>
+                    @endif
+
+                    @if (!in_array(request()->path(), ['puros']))
+                        <li class="nav-item">
+                            <form action="{{ route('puros') }}" method="GET">
+
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Registro Puros</button>
+                            </form>
+                        </li>
+                    @endif
+
+                    <li class="nav-item">
+                        <form action="{{ route('registrarusuario') }}" method="GET">
+                            <button type="submit" class="nav-link btn btn-link"
+                                style="color: white; text-decoration: none;">Registrar Usuario</button>
+                        </form>
+                    </li>
+
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST">
+                            <button type="submit" class="nav-link btn btn-link"
+                                style="color: white; text-decoration: none;">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    @endif
 
 
     @yield('content')
@@ -162,7 +197,6 @@
     @stack('scripts')
 
     <script>
-
         const hamburger = document.getElementById("hamburger");
         const closeSidebar = document.getElementById("closeSidebar");
         const sidebar = document.getElementById("sidebar");

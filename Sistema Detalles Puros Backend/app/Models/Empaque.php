@@ -25,7 +25,7 @@ class Empaque extends Model
 
     protected $table = 'empaque';
 
-    protected $primaryKey = 'id_empaque';
+    protected $primaryKey = 'codigo_empaque';
 
     public $timestamps = true;
 
