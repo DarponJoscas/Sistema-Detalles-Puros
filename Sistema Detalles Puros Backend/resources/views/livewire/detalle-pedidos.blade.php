@@ -332,8 +332,6 @@
     </div>
 
     @push('scripts')
-        <script>
-
-        </script>
+        <script></script>
     @endpush
 </div>

@@ -16,6 +16,15 @@ class AliasVitola extends Model
     use HasFactory;
     protected $table = 'alias_vitola';
     protected $primaryKey = 'id_aliasvitola';
-    protected $fillable = ['alias_vitola'];
+    protected $keyType = 'int';
+    public $incrementing = false;
+
+    protected $fillable =
+    [
+        'id_aliasvitola',
+        'alias_vitola',
+    ];
+
+
     public $timestamps = true;
 }

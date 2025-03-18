@@ -17,6 +17,13 @@ class Capa extends Model
     use HasFactory;
     protected $table = 'capa';
     protected $primaryKey = 'id_capa';
-    protected $fillable = ['capa'];
+    protected $keyType = 'int';
+    public $incrementing = false;
+
+    protected $fillable = [
+       'id_capa',
+       'capa',
+    ];
+
     public $timestamps = true;
 }

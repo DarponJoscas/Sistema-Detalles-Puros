@@ -1,6 +1,4 @@
 <script>
-   // Agregar este script a tu archivo alertas.blade.php o incluirlo en tu layout principal
-
 document.addEventListener('livewire:initialized', function () {
     Livewire.on('swalSuccess', ({ message = 'Se ha registrado correctamente' }) => {
         Swal.fire({

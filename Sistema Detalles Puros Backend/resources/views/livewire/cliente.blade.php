@@ -1,6 +1,5 @@
 <div>
 
-    @if(request()->is('registrarcliente'))
     <!-- Modal de registrar un cliente-->
     <div class="modal fade" id="RegistrarClienteModal" tabindex="-1" aria-labelledby="exampleModalLabel" wire:ignore>
         <div class="modal-dialog">
@@ -23,8 +22,7 @@
             </div>
         </div>
     </div>
-
-    @elseif(request()->is('modificarcliente'))
+¿
     <!-- Modal de modificar un cliente-->
     <div class="modal fade" id="ModificarClienteModal" tabindex="-1" aria-labelledby="exampleModalLabel" wire:ignore>
         <div class="modal-dialog">
@@ -47,5 +45,5 @@
             </div>
         </div>
     </div>
-    @endif
+
 </div>

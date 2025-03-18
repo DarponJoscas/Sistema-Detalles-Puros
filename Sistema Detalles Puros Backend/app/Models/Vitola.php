@@ -17,6 +17,13 @@ class Vitola extends Model
     use HasFactory;
     protected $table = 'vitola';
     protected $primaryKey = 'id_vitola';
-    protected $fillable = ['vitola'];
+    protected $keyType = 'int';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id_vitola',
+        'vitola',
+    ];
+
     public $timestamps = true;
 }

@@ -3,151 +3,192 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Validator;
 use App\Models\Usuario;
 use App\Models\Rol;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Livewire\WithPagination;
-
 
 class Usuarios extends Component
 {
-    use WithPagination;
+    public $usuario = '';
+    public $contrasena_usuario = '';
+    public $id_rol = '';
+    public $error_message = '';
+    public $success_message = '';
 
-    public $usuario_id, $usuario, $contrasena_usuario, $id_rol, $name_usuario, $rol, $estado_usuario;
-    public $page = 1;
-
-    public $estadoUsuario = null;
-    public $perPage = 10;
-    protected $paginationTheme = 'bootstrap';
-
-    public function getDatosUsuarios()
+    public function login()
     {
-        $query = "CALL GetUsuarios(?)";
-        $results = DB::select($query, [$this->estadoUsuario]);
-
-        // Creamos la colección de resultados
-        $collection = collect($results)->map(function ($row) {
-            return [
-                'id_usuario' => $row->id_usuario ?? '',
-                'name_usuario' => $row->name_usuario ?? '',
-                'password' => $row->password ?? '',
-                'rol' => $row->rol ?? '',
-                'estado_usuario' => $row->estado_usuario ?? '',
-            ];
-        });
-
-        // Total de registros
-        $registrosUsuarios = $collection->count();
-
-        // Página actual
-        $currentPage = $this->getPage();
-
-        // Filtramos los registros de la página actual
-        $items = $collection->forPage($currentPage, $this->perPage)->values();
-
-        // Retornamos la paginación manual con LengthAwarePaginator
-        return new LengthAwarePaginator(
-            $items,
-            $registrosUsuarios,
-            $this->perPage,
-            $currentPage,
-            ['path' => request()->url()]
+        $validator = Validator::make(
+            [
+                'usuario' => $this->usuario,
+                'contrasena_usuario' => $this->contrasena_usuario,
+            ],
+            [
+                'usuario' => 'required|string',
+                'contrasena_usuario' => 'required|min:8',
+            ]
         );
-    }
 
-    public function editUser($id_usuario)
-    {
-        $usuario = Usuario::find($id_usuario);
+        if ($validator->fails()) {
+            $this->error_message = 'Las credenciales no son correctas.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
+            return;
+        }
 
-        if ($usuario) {
-            $this->usuario_id = $usuario->id_usuario;
-            $this->name_usuario = $usuario->name_usuario;
-            $this->rol = $usuario->id_rol;
-            $this->estado_usuario = $usuario->estado_usuario;
-        } else {
-            session()->flash('error', 'Usuario no encontrado.');
+        $user = Usuario::where('name_usuario', $this->usuario)->first();
+
+        if (!$user) {
+            Log::warning('Intento de inicio de sesión con usuario no registrado', ['usuario' => $this->usuario]);
+            $this->error_message = 'Las credenciales no son correctas.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
+            return;
+        }
+
+        if ($user->estado_usuario == 0) {
+            Log::warning('Intento de inicio de sesión con usuario inactivo', ['usuario' => $this->usuario]);
+            $this->error_message = 'El usuario está inactivo.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
+            return;
+        }
+
+        if (!Hash::check($this->contrasena_usuario, $user->password)) {
+            Log::warning('Contraseña incorrecta para el usuario', ['usuario' => $this->usuario]);
+            $this->error_message = 'Las credenciales no son correctas.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
+            return;
+        }
+
+        try {
+            if ($token = JWTAuth::attempt(['name_usuario' => $this->usuario, 'password' => $this->contrasena_usuario])) {
+                session(['token' => $token]);
+
+                switch ($user->id_rol) {
+                    case 1:
+                        return redirect()->route('dashboard');
+                    case 2:
+                        return redirect()->route('produccion');
+                    case 3:
+                        return redirect()->route('empaque');
+                    default:
+                        return redirect()->route('login');
+                }
+            } else {
+                $this->error_message = 'Las credenciales no son correctas.';
+                $this->dispatch('swal', json_encode([
+                    'icon'  => 'error',
+                    'title' => 'Error',
+                    'text'  => $this->error_message
+                ]));
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al generar el token: ' . $e->getMessage());
+            $this->error_message = 'Hubo un problema al generar el token.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
         }
     }
 
-    public function createUser()
+    public function register()
     {
-        $this->validate([
-            'name_usuario' => 'required|string|max:255',
-            'contrasena_usuario' => 'required|string|min:8',
-            'rol' => 'required|exists:roles,id_rol'
+        if (Auth::user()->id_rol !== 1) {
+            $this->error_message = 'No tienes permisos para registrar usuarios.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
+            return;
+        }
+
+        $validated = $this->validate([
+            'usuario' => 'required|string|unique:usuarios,name_usuario',
+            'contrasena_usuario' => 'required|min:8',
+            'id_rol' => 'required|exists:roles,id_rol',
         ]);
+
+        DB::beginTransaction();
 
         try {
             Usuario::create([
-                'name_usuario' => $this->name_usuario,
+                'name_usuario' => $this->usuario,
                 'password' => Hash::make($this->contrasena_usuario),
                 'estado_usuario' => 1,
-                'id_rol' => $this->rol
+                'id_rol' => $this->id_rol,
             ]);
 
-            $this->reset(['name_usuario', 'contrasena_usuario', 'rol']);
-            $this->dispatch('close-modal');
-            $this->dispatch('saved');
+            DB::commit();
 
-            session()->flash('success', 'Usuario creado exitosamente.');
-            return redirect()->route('usuarios');
+            $this->success_message = 'Usuario registrado con éxito. Inicia sesión.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'success',
+                'title' => 'Éxito',
+                'text'  => $this->success_message
+            ]));
+            $this->reset(['usuario', 'contrasena_usuario', 'id_rol']);
+            $this->dispatch('close-modal');
+
+            return redirect()->route('login');
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->dispatch('error');
-            session()->flash('error', 'Ocurrió un error al procesar la solicitud.');
+            Log::error('Error al registrar el usuario: ' . $e->getMessage());
+            $this->error_message = 'Hubo un problema al registrar el usuario.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
         }
     }
 
-    public function deleteUsuario($id_usuario)
+    public function logout()
     {
         try {
-            $usuario = Usuario::where('id_usuario', $id_usuario)->first();
-            if ($usuario) {
-                $usuario->estado_usuario = 0;
-                $usuario->save();
-                $this->dispatchBrowserEvent('usuario-actualizado'); // o cualquier evento de tu elección
+            JWTAuth::invalidate(JWTAuth::getToken());
+            Auth::logout();
 
-                session()->flash('success', 'Se ha desactivado correctamente el puro.');
-            } else {
-                session()->flash('error', 'No se encontró el registro para desactivar.');
-            }
+            $this->success_message = 'Has cerrado sesión exitosamente.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'success',
+                'title' => 'Éxito',
+                'text'  => $this->success_message
+            ]));
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al desactivar el puro.');
-            Log::error('Error en eliminarPuros: ' . $e->getMessage());
+            Log::error('Error al cerrar sesión: ' . $e->getMessage());
+            $this->error_message = 'Hubo un problema al cerrar sesión.';
+            $this->dispatch('swal', json_encode([
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => $this->error_message
+            ]));
         }
+
+        return redirect()->route('login');
     }
 
-    public function reactivarUsuario($id_usuario)
-    {
-        try {
-            $usuario = Usuario::where('id_usuario', $id_usuario)->first();
-            if ($usuario) {
-                $usuario->estado_usuario = 1;
-                $usuario->save();
-                $this->dispatchBrowserEvent('usuario-actualizado'); // o cualquier evento de tu elección
-                session()->flash('success', 'Se ha activado correctamente el puro.');
-            } else {
-                session()->flash('error', 'No se encontró el registro para activar.');
-            }
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error al desactivar el puro.');
-            Log::error('Error en eliminarPuros: ' . $e->getMessage());
-        }
-    }
-
-    public function render()
-    {
-        return view(
-            'livewire.usuarios',
-            [
-                'datosPaginados' => $this->getDatosUsuarios(),
-                'roles' => Rol::all()
-            ]
-        )->extends('layouts.app')->section('content');
-    }
+    public function render() { return view('livewire.usuarios',
+        ['roles' => Rol::all()])
+        ->extends('layouts.app')->section('content'); }
 }

@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Sistema Detalle Puro')</title>
+    <title>Sistema Detalle Puro</title>
     @livewireStyles
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 
     <style>
         #sidebar {
@@ -45,24 +45,22 @@
         }
 
         #navbar {
-            background-color: #000000;
-            padding: 5px 15px;
-            height: 30px;
-            width: 100%;
             display: flex;
-            align-items: center;
+            background-color: #000000;
             justify-content: space-between;
+            align-items: center;
+            padding: 2px 10px;
         }
 
         #hamburger {
-            font-size: 20px;
-            color: white;
-            background-color: transparent;
+            background: none;
             border: none;
+            font-size: 24px;
             cursor: pointer;
-            padding: 8px 5px;
-            transition: color 0.2s;
+            display: flex;
+            align-items: center;
         }
+
 
         #hamburger:hover {
             color: #adb5bd;
@@ -105,17 +103,18 @@
 </head>
 
 <body>
+
     @if (!in_array(request()->path(), ['login', 'dashboard']))
         <div id="navbar-content" class="navbar-content">
 
             <nav id="navbar" class="navbar navbar-expand-lg">
-                <button id="hamburger" aria-label="Menú"><i class="fas fa-bars"></i></button>
+                <button id="hamburger" aria-label="Menú"><i class="bi bi-list  text-white"></i></button>
             </nav>
 
             <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
             <nav id="sidebar">
-                <button id="closeSidebar" aria-label="Cerrar menú">&times;</button>
+                <button id="closeSidebar" aria-label="Cerrar menú"><i class="bi bi-x"></i></button>
                 <h4>Menú</h4>
                 <ul class="nav flex-column">
                     <li class="nav-item">
@@ -167,12 +166,14 @@
                         </li>
                     @endif
 
-                    <li class="nav-item">
-                        <form action="{{ route('registrarusuario') }}" method="GET">
-                            <button type="submit" class="nav-link btn btn-link"
-                                style="color: white; text-decoration: none;">Registrar Usuario</button>
-                        </form>
-                    </li>
+                    @if (!in_array(request()->path(), ['usuarios']))
+                        <li class="nav-item">
+                            <form action="{{ route('usuarios') }}" method="GET">
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Registrar Usuario</button>
+                            </form>
+                        </li>
+                    @endif
 
                     <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST">
@@ -184,7 +185,6 @@
             </nav>
         </div>
     @endif
-
 
     @yield('content')
 
@@ -228,6 +228,13 @@
         if (overlay) {
             overlay.addEventListener("click", closeSidebarFunc);
         }
+
+        new TomSelect('#codigoPuro');
+        new TomSelect('#presentacionPuro');
+        new TomSelect('#marca');
+        new TomSelect('#vitola');
+        new TomSelect('#aliasVitola');
+        new TomSelect('#capa');
     </script>
 </body>
 

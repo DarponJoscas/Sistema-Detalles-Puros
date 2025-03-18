@@ -4,28 +4,40 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\InfoPuro;
+use App\Models\Capa;
+use App\Models\Vitola;
+use App\Models\AliasVitola;
+use App\Models\Marca;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\WithPagination;
 
 class InfoPuros extends Component
 {
     public $estadoPuro = null;
-    public $perPage = 10;
+    public $perPage = 25;
     public $page = 1;
     protected $paginationTheme = 'bootstrap';
     use WithPagination;
 
+    public $processedCount = 0;
+    public $totalCount = 0;
 
     public $presentacion_puro, $marca, $alias_vitola, $vitola, $capa, $codigo_puro;
     public $id_marca, $id_vitola, $id_aliasvitola, $id_capa, $estado_puro = 1;
 
-    public $presentaciones = [], $marcas = [], $alias_vitolas = [], $vitolas = [], $capas = [], $codigos_puros = [];
+    public $presentaciones = [], $marcas = [], $alias_vitolas = [], $vitolas = [], $capas = [], $puros = [];
     public $editing = false;
     public $codigo_puro_busqueda = '';
     public $originalCodigo = '';
     public $showModal = false;
+
+    public $importing = false;
+    public $importStatus = null;
+    public $importedCount = 0;
+    public $errors = [];
 
     protected function rules()
     {
@@ -51,14 +63,15 @@ class InfoPuros extends Component
 
     public function mount()
     {
+
+
         $this->loadCodigos();
         $this->loadSelectOptions();
-
     }
 
     private function loadCodigos()
     {
-        $this->codigos_puros = DB::table('info_puro')
+        $this->puros = DB::table('info_puro')
             ->select('codigo_puro as value', 'codigo_puro as text')
             ->get()
             ->toArray();
@@ -177,7 +190,6 @@ class InfoPuros extends Component
     public function resetForm()
     {
         $this->reset(['codigo_puro', 'presentacion_puro', 'marca', 'alias_vitola', 'vitola', 'capa', 'editing', 'originalCodigo']);
-        $this->resetErrorBag();
     }
 
     public function createPuro()
@@ -223,7 +235,6 @@ class InfoPuros extends Component
             $this->loadSelectOptions();
             $this->loadCodigos();
             $this->closeModal();
-
         } catch (\Exception $e) {
             DB::rollBack();
             session()->flash('error', 'Error al procesar la operación. Por favor, inténtelo de nuevo.');
@@ -233,7 +244,7 @@ class InfoPuros extends Component
 
     public function editPuro($codigoPuro)
     {
-        $this->editing = true;
+
         $this->originalCodigo = $codigoPuro;
 
         $puro = InfoPuro::where('codigo_puro', $codigoPuro)->first();
@@ -256,11 +267,9 @@ class InfoPuros extends Component
             $this->alias_vitola = $aliasVitola ? $aliasVitola->alias_vitola : '';
             $this->capa = $capa ? $capa->capa : '';
 
-            $this->resetErrorBag();
             $this->openModal();
         }
     }
-
 
     public function getDatosPuros()
     {
@@ -298,12 +307,6 @@ class InfoPuros extends Component
         );
     }
 
-    public function filtrarPuros($estado)
-    {
-        $this->estadoPuro = $estado;
-        $this->resetPage();
-    }
-
     public function eliminarPuros($codigoPuro)
     {
         try {
@@ -321,27 +324,120 @@ class InfoPuros extends Component
         }
     }
 
-    public function reactivarPuro($codigoPuro)
+    public function importProducts()
     {
         try {
-            $registro = InfoPuro::where('codigo_puro', $codigoPuro)->first();
-            if ($registro) {
-                $registro->estado_puro = 1;
-                $registro->save();
-                session()->flash('success', 'Se ha reactivado correctamente el puro.');
-            } else {
-                session()->flash('error', 'No se encontró el registro para reactivar.');
+            set_time_limit(300);
+            $apiUrl = env('APP_URL') . 'materia_prima/productos';
+            $response = Http::timeout(30)->get($apiUrl);
+
+            if (!$response->successful()) {
+                throw new \Exception('Error al obtener datos de la API: ' . $response->status());
             }
+
+            $data = $response->json();
+
+            if (!is_array($data) || empty($data)) {
+                throw new \Exception('El formato de los datos recibidos no es válido o está vacío.');
+            }
+
+            $products = $data['data'] ?? $data;
+
+            if (!is_array($products) || empty($products)) {
+                throw new \Exception('No se encontraron productos en la respuesta de la API.');
+            }
+
+            $this->totalCount = count($products);
+            $this->processedCount = 0;
+
+            DB::beginTransaction();
+
+            foreach ($products as $product) {
+                $this->processedCount++;
+                $this->dispatch('progressUpdated', $this->processedCount, $this->totalCount);
+
+                $requiredKeys = ["id", "codigo", "presentacion", "marca", "id_marca", "vitola", "id_vitola", "nombre", "id_nombre", "capa", "id_capa"];
+                foreach ($requiredKeys as $key) {
+                    if (!array_key_exists($key, $product)) {
+                        throw new \Exception("Falta la clave '$key' en el producto: " . json_encode($product));
+                    }
+                }
+
+                Marca::updateOrCreate(
+                    ['id_marca' => $product['id_marca']],
+                    [
+                        'id_marca' => $product['id_marca'],
+                        'marca' => $product['marca'],
+                        'updated_at' => now(),
+                        'created_at' => now()
+                    ]
+                );
+
+                Vitola::updateOrCreate(
+                    ['id_vitola' => $product['id_vitola']],
+                    [
+                        'id_vitola' => $product['id_vitola'],
+                        'vitola' => $product['vitola'],
+                        'updated_at' => now(),
+                        'created_at' => now()
+                    ]
+                );
+
+                AliasVitola::updateOrCreate(
+                    ['id_aliasvitola' => $product['id_nombre']],
+                    [
+                        'id_aliasvitola' => $product['id_nombre'],
+                        'alias_vitola' => $product['nombre'],
+                        'updated_at' => now(),
+                        'created_at' => now()
+                    ]
+                );
+
+                Capa::updateOrCreate(
+                    ['id_capa' => $product['id_capa']],
+                    [
+                        'id_capa' => $product['id_capa'],
+                        'capa' => $product['capa'],
+                        'updated_at' => now(),
+                        'created_at' => now()
+                    ]
+                );
+
+                InfoPuro::updateOrCreate(
+                    ['id_puro' => $product['id']],
+                    [
+                        'codigo_puro' => $product['codigo'],
+                        'presentacion_puro' => $product['presentacion'],
+                        'id_marca' => $product['id_marca'],
+                        'id_vitola' => $product['id_vitola'],
+                        'id_aliasvitola' => $product['id_nombre'],
+                        'id_capa' => $product['id_capa'],
+                        'estado_puro' => 1,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+
+            DB::commit();
+            session()->flash('success', 'Datos importados exitosamente.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al reactivar el puro.');
-            Log::error('Error en reactivarPuro: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Error en importProducts: ' . $e->getMessage());
+            session()->flash('error', 'Error: ' . $e->getMessage());
         }
     }
-
     public function render()
     {
         return view('livewire.info-puros', [
-            'datosPaginados' => $this->getDatosPuros()
+            'datosPaginados' => $this->getDatosPuros(),
+            $this->vitolas = DB::table('vitola')->get(['id_vitola', 'vitola']),
+            $this->marcas = DB::table('marca')->get(['id_marca', 'marca']),
+            $this->alias_vitolas = DB::table('alias_vitola')->get(['id_aliasvitola', 'alias_vitola']),
+            $this->capas = DB::table('capa')->get(['id_capa', 'capa']),
+            $this->puros = DB::table('info_puro')->get(['id_puro', 'codigo_puro']),
+            $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
+
         ])->extends('layouts.app')->section('content');
     }
 }

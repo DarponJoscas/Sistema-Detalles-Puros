@@ -7,7 +7,10 @@ use App\Livewire\Admin\Dashboards;
 use App\Livewire\Cliente;
 use App\Livewire\DetallePedidos;
 use App\Livewire\InfoPuros;
+use App\Livewire\RegistroUsuarios;
 use App\Livewire\Roles;
+
+
 
 Route::get('/login', Usuarios::class)->name('login');
 Route::post('/logout', [Usuarios::class, 'logout'])->name('logout');
@@ -17,13 +20,6 @@ Route::get('/produccion', DetallePedidos::class)->name('produccion');
 Route::get('/empaque', DetallePedidos::class)->name('empaque');
 Route::get('/administracion', DetallePedidos::class)->name('administracion');
 
-Route::get('/usuarios', Usuarios::class)->name('usuarios');
+Route::get('/usuarios', RegistroUsuarios::class)->name('usuarios');
 Route::get('/registrarusuario', Usuarios::class)->name('registrarusuario');
 Route::get('/puros', InfoPuros::class)->name('puros');
-Route::get('/createrol', Roles::class)->name('createrol');
-
-Route::get('/actualizarcliente', Cliente::class)->name('actualizarcliente');
-Route::get('/actualizarusuario', Usuarios::class)->name('actualizarusuario');
-
-
-Route::get('/updaterol', Usuarios::class)->name('updaterol');

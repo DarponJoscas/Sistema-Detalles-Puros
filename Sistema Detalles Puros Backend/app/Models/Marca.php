@@ -17,6 +17,13 @@ class Marca extends Model
     use HasFactory;
     protected $table = 'marca';
     protected $primaryKey = 'id_marca';
-    protected $fillable = ['marca'];
+    protected $keyType = 'int';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'id_marca',
+        'marca',
+    ];
+
     public $timestamps = true;
 }
