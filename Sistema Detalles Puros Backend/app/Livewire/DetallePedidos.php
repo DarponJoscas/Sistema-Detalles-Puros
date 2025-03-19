@@ -16,8 +16,6 @@ class DetallePedidos extends Component
 {
     use WithFileUploads, WithPagination;
 
-    public $selectedCliente = null;
-    public $selectedCodigoPuro = null;
     public $estadoPedido = null;
 
     public $currentUrl;
@@ -42,6 +40,13 @@ class DetallePedidos extends Component
     public $codigo_empaque;
     public $tipo_empaque;
 
+    public $filtro_cliente = null;
+    public $filtro_codigo_puro = null;
+    public $filtro_presentacion = null;
+    public $filtro_vitola = null;
+    public $filtro_alias_vitola = null;
+    public $filtro_capa = null;
+    public $filtro_codigo_empaque = null;
 
     public $clientes = [];
     public $puros = [];
@@ -53,6 +58,7 @@ class DetallePedidos extends Component
     public $imagenAnilladoActual = null;
     public $imagenCajaActual = null;
 
+    public $vitolas, $capas, $empaques, $presentaciones, $marcas, $alias_vitolas;
     public $perPage = 10;
     protected $paginationTheme = 'bootstrap';
 
@@ -68,19 +74,6 @@ class DetallePedidos extends Component
         'descripcion_produccion' => 'nullable|string|max:255',
         'imagen_produccion' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ];
-
-    public function mount($id_pedido = null)
-    {
-        $this->id_pedido = $id_pedido;
-        $this->clientes = DB::table('clientes')->get(['id_cliente', 'name_cliente']);
-        $this->puros = DB::table('info_puro')->get(['id_puro', 'codigo_puro']);
-
-        $this->currentUrl = request()->url();
-
-        if ($id_pedido) {
-            $this->cargaredidos($id_pedido);
-        }
-    }
 
     public function infoPuro()
     {
@@ -160,14 +153,36 @@ class DetallePedidos extends Component
     }
 
 
-    public function filtrarPedidos($estado)
+    public function filtrarPedidos()
     {
-        $this->estadoPedido = $estado;
+        $this->resetPage();
+    }
+
+    public function resetFilters()
+    {
+        $this->reset([
+            'filtro_cliente',
+            'filtro_codigo_puro',
+            'filtro_presentacion',
+            'filtro_vitola',
+            'filtro_alias_vitola',
+            'filtro_capa',
+            'filtro_codigo_empaque'
+        ]);
+        $this->resetPage();
     }
 
     public function getDatos()
     {
-        $results = DB::select("CALL GetDetallePedido(?)", [$this->estadoPedido]);
+        $results = DB::select("CALL GetDetallePedido(?, ?, ?, ?, ?, ?, ?)", [
+            $this->filtro_cliente,
+            $this->filtro_codigo_puro,
+            $this->filtro_presentacion,
+            $this->filtro_vitola,
+            $this->filtro_alias_vitola,
+            $this->filtro_capa,
+            $this->filtro_codigo_empaque
+        ]);
 
         $collection = collect($results)->map(function ($row) {
             return [
@@ -353,17 +368,6 @@ class DetallePedidos extends Component
         return str_contains($this->currentUrl, '/produccion');
     }
 
-    private function loadSelectOptions()
-    {
-        $this->codigo_puro = DB::table('info_puro')
-            ->select('codigo_puro')
-            ->distinct()
-            ->get()
-            ->map(function ($item) {
-                return ['value' => $item->codigo_puro, 'text' => $item->codigo_puro];
-            });
-    }
-
     public function editarPedido($id_pedido)
     {
         // Obtener los datos del pedido
@@ -491,7 +495,6 @@ class DetallePedidos extends Component
 
             session()->flash('message', 'Pedido actualizado correctamente.');
             $this->cancelarEdicion();
-
         } catch (\Exception $e) {
             Log::error('Error al actualizar detalle de pedido y empaque', [
                 'error' => $e->getMessage(),
@@ -526,6 +529,13 @@ class DetallePedidos extends Component
     {
         return view('livewire.detalle-pedidos', [
             'datosPaginados' => $this->getDatos(),
+            $this->vitolas = DB::table('vitola')->get(['vitola']),
+            $this->marcas = DB::table('marca')->get(['marca']),
+            $this->alias_vitolas = DB::table('alias_vitola')->get(['alias_vitola']),
+            $this->capas = DB::table('capa')->get(['capa']),
+            $this->puros = DB::table('info_puro')->get(['codigo_puro']),
+            $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
+            $this->clientes = DB::table('clientes')->get(['id_cliente', 'name_cliente']),
         ])->extends('layouts.app')->section('content');
     }
 }

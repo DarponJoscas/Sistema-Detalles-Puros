@@ -1,53 +1,49 @@
 <div>
-    <div class="d-inline-block m-3">
+    <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
         <div>
             <div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <label for="codigoPuro">Código Puro:</label>
-                        <select type="text" id="codigoPuro">
-                            <option value="">Seleccione un cliente</option>
+                <div class="row g-0">
+                    <div wire:ignore  class="col px-1" style="width: 160px; flex: none;">
+                        <select id="codigoPuro" wire:model="filtro_codigo_puro" wire:change="filtrarPedidos">
+                            <option value="">Buscar un código puro</option>
                             @foreach ($puros as $puro)
                                 <option value="{{ $puro->codigo_puro }}">{{ $puro->codigo_puro }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="presentacionPuro">Presentación Puro:</label>
-                        <select id="presentacionPuro">
-                            <option value="">Seleccione un presentacion</option>
+
+                    <div wire:ignore class="col px-1" style="width: 190px; flex: none;">
+                        <select id="presentacionPuro" wire:model="filtro_presentacion" wire:change="filtrarPedidos">
+                            <option value="">Buscar presentación puro</option>
                             @foreach ($presentaciones as $presentacion)
                                 <option value="{{ $presentacion->presentacion_puro }}">
-                                    {{ $presentacion->presentacion_puro }}</option>
+                                    {{ $presentacion->presentacion_puro }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="marca">Marca:</label>
-                        <select id="marca">
-                            <option value="">Seleccione un cliente</option>
+
+                    <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                        <select id="marca" wire:model="filtro_marca" wire:change="filtrarPedidos">
+                            <option value="">Buscar marca</option>
                             @foreach ($marcas as $marca)
-                                <option value="{{ $marca->id_marca }}">{{ $marca->marca }}</option>
+                                <option value="{{ $marca->marca }}">{{ $marca->marca }}</option>
                             @endforeach
                         </select>
                     </div>
-                </div>
 
-                <div class="row mt-2">
-                    <div class="col-md-4">
-                        <label for="vitola">Vitola:</label>
-                        <select id="vitola">
-                            <option value="">Seleccione un cliente</option>
+                    <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                        <select id="vitola" wire:model="filtro_vitola" wire:change="filtrarPedidos">
+                            <option value="">Buscar vitola</option>
                             @foreach ($vitolas as $vitola)
-                                <option value="{{ $vitola->id_vitola }}">{{ $vitola->vitola }}</option>
+                                <option value="{{ $vitola->vitola }}">{{ $vitola->vitola }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label for="aliasVitola">Alias Vitola:</label>
-                        <select id="aliasVitola">
-                            <option value="">Seleccione un cliente</option>
+                    <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                        <select id="aliasVitola" wire:model="filtro_alias_vitola" wire:change="filtrarPedidos">
+                            <option value="">Buscar alias vitola</option>
                             @foreach ($alias_vitolas as $alias_vitola)
                                 <option value="{{ $alias_vitola->alias_vitola }}">{{ $alias_vitola->alias_vitola }}
                                 </option>
@@ -55,15 +51,15 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label for="capa">Capa:</label>
-                        <select id="capa">
-                            <option value="">Seleccione un cliente</option>
+                    <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                        <select id="capa" wire:model="filtro_capa" wire:change="filtrarPedidos">
+                            <option value="">Buscar capa</option>
                             @foreach ($capas as $capa)
-                                <option value="{{ $capa->id_capa }}">{{ $capa->capa }}</option>
+                                <option value="{{ $capa->capa }}">{{ $capa->capa }}</option>
                             @endforeach
                         </select>
                     </div>
+                </div>
                 </div>
                 <div class="d-flex justify-content-between mt-2">
                     <button class="btn btn-primary" wire:click="importProducts">Cargar Puros</button>

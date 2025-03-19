@@ -1,49 +1,92 @@
 <div>
-    <div class="d-inline-block m-3" x-data="{
-        clientSelect: null,
-        codigoPuroSelect: null,
+    <div class="d-inline-block m-3">
+        <div style="z-index: -800; position: absolute;">
+            <div class="row g-0">
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                    <select id="cliente" wire:model="filtro_cliente" wire:change="filtrarPedidos">
+                        <option value="">Buscar un cliente</option>
+                        @foreach ($clientes as $cliente)
+                            <option value="{{ $cliente->name_cliente }}">{{ $cliente->name_cliente }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        initSelects() {
-            // Destroy previous instances if they exist
-            if (this.clientSelect) this.clientSelect.destroy();
-            if (this.codigoPuroSelect) this.codigoPuroSelect.destroy();
+                <div wire:ignore  class="col px-1" style="width: 160px; flex: none;">
+                    <select id="codigoPuro" wire:model="filtro_codigo_puro" wire:change="filtrarPedidos">
+                        <option value="">Buscar un código puro</option>
+                        @foreach ($puros as $puro)
+                            <option value="{{ $puro->codigo_puro }}">{{ $puro->codigo_puro }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            // Initialize client select
-            this.clientSelect = new TomSelect('#select-cliente', {
-                create: false,
-                sortField: { field: 'text', direction: 'asc' },
-                plugins: ['dropdown_input'],
-                allowEmptyOption: true,
-                onChange: function(value) {
-                    this.blur();
-                    @this.set('id_cliente', value);
-                }
-            });
+                <div wire:ignore class="col px-1" style="width: 190px; flex: none;">
+                    <select id="presentacionPuro" wire:model="filtro_presentacion" wire:change="filtrarPedidos">
+                        <option value="">Buscar presentación puro</option>
+                        @foreach ($presentaciones as $presentacion)
+                            <option value="{{ $presentacion->presentacion_puro }}">
+                                {{ $presentacion->presentacion_puro }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            // Initialize product code select
-            this.codigoPuroSelect = new TomSelect('#select-codigo-puro', {
-                create: false,
-                sortField: { field: 'text', direction: 'asc' },
-                plugins: ['dropdown_input'],
-                allowEmptyOption: true,
-                onChange: function(value) {
-                    this.blur();
-                    @this.set('codigo_puro', value);
-                    @this.call('infoPuro');
-                }
-            });
-        }
-    }" x-init="initSelects()"
-        x-on:livewire:load.window="initSelects()" x-on:modal-opened.window="setTimeout(() => initSelects(), 100)">
-        <div>
-            <div>
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                    <select id="marca" wire:model="filtro_marca" wire:change="filtrarPedidos">
+                        <option value="">Buscar marca</option>
+                        @foreach ($marcas as $marca)
+                            <option value="{{ $marca->marca }}">{{ $marca->marca }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                    <select id="vitola" wire:model="filtro_vitola" wire:change="filtrarPedidos">
+                        <option value="">Buscar vitola</option>
+                        @foreach ($vitolas as $vitola)
+                            <option value="{{ $vitola->vitola }}">{{ $vitola->vitola }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                    <select id="aliasVitola" wire:model="filtro_alias_vitola" wire:change="filtrarPedidos">
+                        <option value="">Buscar alias vitola</option>
+                        @foreach ($alias_vitolas as $alias_vitola)
+                            <option value="{{ $alias_vitola->alias_vitola }}">{{ $alias_vitola->alias_vitola }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                    <select id="capa" wire:model="filtro_capa" wire:change="filtrarPedidos">
+                        <option value="">Buscar capa</option>
+                        @foreach ($capas as $capa)
+                            <option value="{{ $capa->capa }}">{{ $capa->capa }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                    <select id="codigoItem" wire:model="filtro_codigo_empaque" wire:change="filtrarPedidos">
+                        <option value="">Buscar item</option>
+                        @foreach (DB::table('empaque')->select('codigo_empaque')->distinct()->get() as $empaque)
+                            <option value="{{ $empaque->codigo_empaque }}">{{ $empaque->codigo_empaque }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <button type="button" class="btn btn-secondary" wire:click="resetFilters">
+                    Resetear Filtros
+                </button>
+
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#registrarpedidoempaqueModal">
                     Registrar Nuevo Pedido
                 </button>
-                <button class="btn btn-success" wire:click="filtrarPedidos(1)">Pedidos Activos</button>
-                <button class="btn btn-danger" wire:click="filtrarPedidos(0)">Pedidos Inactivos</button>
-                <button class="btn btn-secondary" wire:click="filtrarPedidos(null)">Mostrar Todos</button>
             </div>
 
             @if (session()->has('message'))
@@ -177,7 +220,6 @@
                 </div>
                 <div class="modal-body">
                     <form>
-                        <!-- Formulario con TomSelect para Cliente -->
                         <div class="form-group mb-3" wire:ignore>
                             <label for="cliente">Cliente:</label>
                             <select wire:model="id_cliente" id="select-cliente">

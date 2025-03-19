@@ -34,6 +34,14 @@ class InfoPuros extends Component
     public $originalCodigo = '';
     public $showModal = false;
 
+    public $filtro_codigo_puro = null;
+    public $filtro_presentacion = null;
+    public $filtro_vitola = null;
+    public $filtro_alias_vitola = null;
+    public $filtro_capa = null;
+    public $filtro_marca = null;
+
+
     public $importing = false;
     public $importStatus = null;
     public $importedCount = 0;
@@ -271,10 +279,21 @@ class InfoPuros extends Component
         }
     }
 
+    public function filtrarPedidos()
+    {
+        $this->resetPage();
+    }
+
     public function getDatosPuros()
     {
-        $query = "CALL GetPuros(?)";
-        $results = DB::select($query, [$this->estadoPuro]);
+        $results = DB::select("CALL GetPuros(?, ?, ?, ?, ?, ?)", [
+            $this->filtro_codigo_puro,
+            $this->filtro_presentacion,
+            $this->filtro_vitola,
+            $this->filtro_alias_vitola,
+            $this->filtro_capa,
+            $this->filtro_marca
+        ]);
 
         $collection = collect($results)->map(function ($row) {
             return [
@@ -431,11 +450,11 @@ class InfoPuros extends Component
     {
         return view('livewire.info-puros', [
             'datosPaginados' => $this->getDatosPuros(),
-            $this->vitolas = DB::table('vitola')->get(['id_vitola', 'vitola']),
-            $this->marcas = DB::table('marca')->get(['id_marca', 'marca']),
-            $this->alias_vitolas = DB::table('alias_vitola')->get(['id_aliasvitola', 'alias_vitola']),
-            $this->capas = DB::table('capa')->get(['id_capa', 'capa']),
-            $this->puros = DB::table('info_puro')->get(['id_puro', 'codigo_puro']),
+            $this->vitolas = DB::table('vitola')->get(['vitola']),
+            $this->marcas = DB::table('marca')->get(['marca']),
+            $this->alias_vitolas = DB::table('alias_vitola')->get(['alias_vitola']),
+            $this->capas = DB::table('capa')->get(['capa']),
+            $this->puros = DB::table('info_puro')->get(['codigo_puro']),
             $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
 
         ])->extends('layouts.app')->section('content');

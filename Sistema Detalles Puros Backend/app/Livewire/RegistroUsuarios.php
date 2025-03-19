@@ -18,7 +18,7 @@ class RegistroUsuarios extends Component
     use WithPagination;
 
     public $usuario, $contrasena_usuario, $id_rol, $estado_usuario;
-    public $id_usuario, $name_usuario, $rol;
+    public $id_usuario, $name_usuario, $rol, $puros, $usuarios;
 
 
     public $page = 1;
@@ -210,7 +210,8 @@ class RegistroUsuarios extends Component
             'livewire.registro-usuarios',
             [
                 'datosPaginados' => $this->getDatosUsuarios(),
-                'roles' => Rol::all()
+                'roles' => Rol::all(),
+                $this->usuarios = DB::table('usuarios')->get(['id_usuario', 'name_usuario']),
             ]
         )->extends('layouts.app')->section('content');
     }

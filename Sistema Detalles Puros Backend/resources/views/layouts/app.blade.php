@@ -235,6 +235,8 @@
         new TomSelect('#vitola');
         new TomSelect('#aliasVitola');
         new TomSelect('#capa');
+        new TomSelect('#cliente');
+        new TomSelect('#codigoItem');
     </script>
 </body>
 
