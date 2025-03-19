@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Usuarios;
 use App\Livewire\Admin\Dashboards;
 
-use App\Livewire\Cliente;
+use App\Livewire\Registros;
 use App\Livewire\DetallePedidos;
 use App\Livewire\InfoPuros;
 use App\Livewire\RegistroUsuarios;
@@ -20,6 +20,7 @@ Route::get('/produccion', DetallePedidos::class)->name('produccion');
 Route::get('/empaque', DetallePedidos::class)->name('empaque');
 Route::get('/administracion', DetallePedidos::class)->name('administracion');
 
+Route::get('/registros', Registros::class)->name('registros');
 Route::get('/usuarios', RegistroUsuarios::class)->name('usuarios');
 Route::get('/registrarusuario', Usuarios::class)->name('registrarusuario');
 Route::get('/puros', InfoPuros::class)->name('puros');
