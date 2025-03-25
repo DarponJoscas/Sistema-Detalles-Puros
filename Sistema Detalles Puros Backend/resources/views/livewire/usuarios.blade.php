@@ -129,6 +129,15 @@
                         <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
+
+                @if ($error_message)
+                    <p class="error-message text-center">{{ $error_message }}</p>
+                @endif
+
+                @if ($success_message)
+                    <p class="success-message text-center">{{ $success_message }}</p>
+                @endif
+
                 <button type="submit" class="btn">Ingresar</button>
             </form>
         </div>

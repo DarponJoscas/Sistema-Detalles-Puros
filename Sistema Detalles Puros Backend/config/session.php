@@ -13,7 +13,7 @@ return [
     | para las solicitudes entrantes. Laravel soporta varias opciones de
     | almacenamiento para persistir los datos de sesión.
     |
-    | Opciones soportadas: "file", "cookie", "database", "apc", "memcached", 
+    | Opciones soportadas: "file", "cookie", "database", "apc", "memcached",
     | "redis", "dynamodb", "array"
     |
     */
@@ -27,7 +27,7 @@ return [
     |
     | Aquí puedes especificar la cantidad de minutos que deseas que dure
     | la sesión antes de que expire. Si deseas que expire inmediatamente
-    | cuando se cierre el navegador, puedes indicar que expire en el 
+    | cuando se cierre el navegador, puedes indicar que expire en el
     | archivo .env con la opción expire_on_close.
     |
     */
@@ -193,7 +193,7 @@ return [
     |----------------------------------------------------------------------
     |
     | Esta opción controla el comportamiento de las cookies en solicitudes
-    | de terceros, lo que puede ayudar a mitigar ataques CSRF. 
+    | de terceros, lo que puede ayudar a mitigar ataques CSRF.
     | El valor por defecto es 'lax', lo que permite solicitudes seguras
     | entre sitios.
     |

@@ -175,29 +175,11 @@ class InfoPuros extends Component
         }
     }
 
-    public function buscarPorCodigo()
-    {
-        if (!empty($this->codigo_puro_busqueda)) {
-            $this->resetPage();
-        }
-    }
 
     public function openModal()
     {
         $this->showModal = true;
         $this->dispatch('open-modal');
-    }
-
-    public function closeModal()
-    {
-        $this->resetForm();
-        $this->showModal = false;
-        $this->dispatch('close-modal');
-    }
-
-    public function resetForm()
-    {
-        $this->reset(['codigo_puro', 'presentacion_puro', 'marca', 'alias_vitola', 'vitola', 'capa', 'editing', 'originalCodigo']);
     }
 
     public function createPuro()
@@ -289,10 +271,11 @@ class InfoPuros extends Component
         $results = DB::select("CALL GetPuros(?, ?, ?, ?, ?, ?)", [
             $this->filtro_codigo_puro,
             $this->filtro_presentacion,
+            $this->filtro_marca,
             $this->filtro_vitola,
             $this->filtro_alias_vitola,
-            $this->filtro_capa,
-            $this->filtro_marca
+            $this->filtro_capa
+
         ]);
 
         $collection = collect($results)->map(function ($row) {
@@ -446,6 +429,7 @@ class InfoPuros extends Component
             session()->flash('error', 'Error: ' . $e->getMessage());
         }
     }
+
     public function render()
     {
         return view('livewire.info-puros', [

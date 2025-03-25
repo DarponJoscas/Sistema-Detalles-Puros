@@ -1,6 +1,6 @@
 <div>
-    <div class="d-inline-block m-3">
-        <div style="z-index: -800; position: absolute;">
+    <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
+        <div>
             <div class="row g-0">
                 <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
                     <select id="cliente" wire:model="filtro_cliente" wire:change="filtrarPedidos">
@@ -11,7 +11,7 @@
                     </select>
                 </div>
 
-                <div wire:ignore  class="col px-1" style="width: 160px; flex: none;">
+                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
                     <select id="codigoPuro" wire:model="filtro_codigo_puro" wire:change="filtrarPedidos">
                         <option value="">Buscar un código puro</option>
                         @foreach ($puros as $puro)
@@ -71,7 +71,7 @@
                 <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
                     <select id="codigoItem" wire:model="filtro_codigo_empaque" wire:change="filtrarPedidos">
                         <option value="">Buscar item</option>
-                        @foreach (DB::table('empaque')->select('codigo_empaque')->distinct()->get() as $empaque)
+                        @foreach ($empaques as $empaque)
                             <option value="{{ $empaque->codigo_empaque }}">{{ $empaque->codigo_empaque }}</option>
                         @endforeach
                     </select>
@@ -116,11 +116,11 @@
                             <th>Alias Vitola</th>
                             <th>Vitola</th>
                             <th>Capa Puro</th>
-                            @if (!$this->isEmpaquePage())
+                            @if (!in_array(request()->path(), ['empaque']))
                                 <th>Descripción Producción</th>
                                 <th>Imagen Producción</th>
                             @endif
-                            @if (!$this->isProduccionPage())
+                            @if (!in_array(request()->path(), ['produccion']))
                                 <th>Código Ítem</th>
                                 <th>Tipo Empaque</th>
                                 <th>Descripción Empaque</th>
@@ -144,7 +144,7 @@
                                 <td>{{ $dato['alias_vitola'] }}</td>
                                 <td>{{ $dato['vitola'] }}</td>
                                 <td>{{ $dato['capa'] }}</td>
-                                @if (!$this->isEmpaquePage())
+                                @if (!in_array(request()->path(), ['produccion']))
                                     <td>{{ $dato['descripcion_produccion'] }}</td>
                                     <td>
                                         @if ($dato['imagen_produccion'])
@@ -157,7 +157,7 @@
                                     </td>
                                 @endif
 
-                                @if (!$this->isProduccionPage())
+                                @if (!in_array(request()->path(), ['empaque']))
                                     <td>{{ $dato['codigo_empaque'] }}</td>
                                     <td>{{ $dato['tipo_empaque'] }}</td>
                                     <td>{{ $dato['descripcion_empaque'] }}</td>
@@ -235,7 +235,7 @@
 
                         <div class="form-group mb-3" wire:ignore>
                             <label for="codigo_puro">Código de Puro:</label>
-                            <select wire:model="codigo_puro" id="select-codigo-puro">
+                            <select wire:model="codigo_puro" id="select-codigo-puro" wire:change="infoPuro">
                                 <option value="">Seleccione un código</option>
                                 @foreach ($puros as $puro)
                                     <option value="{{ $puro->codigo_puro }}">{{ $puro->codigo_puro }}</option>
@@ -273,7 +273,7 @@
                             <input type="text" wire:model="capa" id="capa" class="form-control" readonly>
                         </div>
 
-                        @if (!$this->isEmpaquePage())
+                        @if (!in_array(request()->path(), ['empaque']))
                             <div class="form-group mb-3">
                                 <label for="descripcion_produccion">Descripción Produccion:</label>
                                 <input type="text" wire:model="descripcion_produccion" id="descripcion_produccion"
@@ -298,7 +298,7 @@
                             </div>
                         @endif
 
-                        @if (!$this->isProduccionPage())
+                        @if (!in_array(request()->path(), ['produccion']))
                             <div class="form-group mb-3">
                                 <label for="codigo_empaque">Código ítem:</label>
                                 <input type="text" wire:model="codigo_empaque" id="codigo_empaque"
@@ -374,6 +374,10 @@
     </div>
 
     @push('scripts')
-        <script></script>
+        <script>
+            document.addEventListener('livewire:load', function() {
+                Livewire.emit('checkAuthStatus');
+            });
+        </script>
     @endpush
 </div>

@@ -2,60 +2,77 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-/**
- * @property int $id_usuario
- * @property string $name_usuario
- * @property string $password
- * @property int $estado_usuario
- * @property int $id_rol
- */
 class Usuario extends Authenticatable implements JWTSubject
 {
-    use Notifiable, HasFactory;
+    use Notifiable;
 
-    protected $table = 'usuarios';
-    protected $primaryKey = 'id_usuario';
+    protected $table = 'usuarios'; // Asegúrate de que coincida con tu tabla
+    protected $primaryKey = 'id_usuario'; // Si la columna de la clave primaria tiene un nombre diferente
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name_usuario',
         'password',
         'estado_usuario',
-        'id_rol'
+        'id_rol',
+        // Otros campos que puedas tener
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'estado_usuario' => 'boolean',
+        'id_rol' => 'integer',
+    ];
 
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
-
-    public function getAuthIdentifierName()
-    {
-        return $this->primaryKey;
-    }
-
-    public function getUserName()
-    {
-        return $this->name_usuario;
-    }
-
-
+    /**
+     * Get the role that owns the user.
+     */
     public function rol()
     {
         return $this->belongsTo(Rol::class, 'id_rol');
+    }
+
+    // Implementación de los métodos requeridos por JWTSubject
+
+    /**
+     * Obtiene el identificador del JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey(); // Usualmente devuelve el ID del usuario
+    }
+
+    /**
+     * Obtiene las afirmaciones (claims) personalizadas del JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return []; // Puedes agregar datos personalizados aquí si lo deseas
     }
 }

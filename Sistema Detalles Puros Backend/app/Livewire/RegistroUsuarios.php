@@ -20,7 +20,6 @@ class RegistroUsuarios extends Component
     public $usuario, $contrasena_usuario, $id_rol, $estado_usuario;
     public $id_usuario, $name_usuario, $rol, $puros, $usuarios;
 
-
     public $page = 1;
     public $estadoUsuario = null;
     public $perPage = 10;
@@ -28,10 +27,17 @@ class RegistroUsuarios extends Component
     public $error_menssage;
     public $showModal = false;
 
+    public $filtro_usuario = null;
+    public $filtro_roles = null;
+    public $showUpdateModal = false;
+    public $showPasswordModal = false;
+
     public function getDatosUsuarios()
     {
-        $query = "CALL GetUsuarios(?)";
-        $results = DB::select($query, [$this->estadoUsuario]);
+        $results = DB::select("CALL GetUsuarios(?, ?)", [
+            $this->filtro_usuario,
+            $this->filtro_roles
+        ]);
 
         $collection = collect($results)->map(function ($row) {
             return [
@@ -59,13 +65,19 @@ class RegistroUsuarios extends Component
     public function editUser($id_usuario)
     {
         $this->id_usuario = $id_usuario;
-        $usuario = Usuario::find($id_usuario);
-        $this->openModal();
+        $usuario = Usuario::where('id_usuario', $id_usuario)->first();
+
         if ($usuario) {
+            $this->id_rol = $usuario->id_rol;
             $this->name_usuario = $usuario->name_usuario;
-            $this->rol = $usuario->id_rol;
-        } else {
-            session()->flash('error', 'Usuario no encontrado.');
+
+            $rol = DB::table('roles')->where('id_rol', $usuario->id_rol)->first();
+            if ($rol) {
+                $this->rol = $rol->rol;
+            }
+
+            $this->showUpdateModal = true;
+            $this->dispatch('open-update-modal');
         }
     }
 
@@ -73,7 +85,7 @@ class RegistroUsuarios extends Component
     {
         $this->validate([
             'name_usuario' => 'required|string|max:255',
-            'rol' => 'required|exists:roles,id_rol'
+            'id_rol' => 'required|exists:roles,id_rol'
         ]);
 
         try {
@@ -82,48 +94,61 @@ class RegistroUsuarios extends Component
             if ($usuario) {
                 $usuario->update([
                     'name_usuario' => $this->name_usuario,
-                    'id_rol' => $this->rol,
+                    'id_rol' => $this->id_rol,
                     'updated_at' => now(),
                 ]);
 
-                DB::commit();
                 $this->reset(['name_usuario', 'id_rol']);
-                $this->save();
+                $this->showUpdateModal = false;
+                $this->dispatch('hide-update-modal');
                 $this->dispatch('refresh');
                 session()->flash('success', 'Usuario actualizado correctamente.');
             } else {
                 session()->flash('error', 'Usuario no encontrado para actualizar.');
             }
         } catch (\Exception $e) {
-            DB::rollBack();
-            $this->dispatch('error');
             session()->flash('error', 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage());
         }
     }
 
-
-    public function openModal()
+    public function filtrarUsuario()
     {
-        $this->showModal = true;
-        $this->dispatch('open-modal');
+        $this->resetPage();
     }
 
-    public function closeModal()
+    public function updatePassword()
     {
-        $this->showModal = false;
-        $this->dispatch('close-modal-password');
+        $this->validate([
+            'contrasena_usuario' => 'required|min:8'
+        ]);
+
+        try {
+            $usuario = Usuario::find($this->id_usuario);
+
+            if ($usuario) {
+                $usuario->update([
+                    'password' => Hash::make($this->contrasena_usuario),
+                    'updated_at' => now(),
+                ]);
+
+                $this->reset(['contrasena_usuario']);
+                $this->showPasswordModal = false;
+                $this->dispatch('hide-password-modal');
+                $this->dispatch('refresh');
+                session()->flash('success', 'Contraseña actualizada correctamente.');
+            } else {
+                session()->flash('error', 'Usuario no encontrado para actualizar.');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage());
+        }
     }
 
-    public function openModalPassword()
+    public function openModalPassword($id_usuario)
     {
-        $this->showModal = true;
-        $this->dispatch('open-modal-password');
-    }
-
-    public function closeModalPassword()
-    {
-        $this->showModal = true;
-        $this->dispatch('close-modal-password');
+        $this->id_usuario = $id_usuario;
+        $this->showPasswordModal = true;
+        $this->dispatch('open-password-modal');
     }
 
     public function register()
@@ -131,11 +156,9 @@ class RegistroUsuarios extends Component
         DB::beginTransaction();
 
         try {
-
             $existingUser = Usuario::where('name_usuario', $this->name_usuario)->first();
 
             if ($existingUser) {
-
                 session()->flash('error', 'El nombre de usuario ya está en uso.');
                 return;
             }
@@ -149,16 +172,13 @@ class RegistroUsuarios extends Component
 
             DB::commit();
             $this->reset(['name_usuario', 'contrasena_usuario', 'id_rol']);
-            $this->save();
             $this->dispatch('refresh');
             session()->flash('success', 'Usuario creado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->dispatch('error');
             session()->flash('error', 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage());
         }
     }
-
 
     public function deleteUsuario($id_usuario)
     {
@@ -185,23 +205,15 @@ class RegistroUsuarios extends Component
             if ($usuario) {
                 $usuario->estado_usuario = 1;
                 $usuario->save();
-                session()->flash('success', 'Se ha activado correctamente el puro.');
+                session()->flash('success', 'Se ha activado correctamente el usuario.');
                 $this->dispatch('refresh');
             } else {
                 session()->flash('error', 'No se encontró el registro para activar.');
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al desactivar el puro.');
-            Log::error('Error en eliminarPuros: ' . $e->getMessage());
+            session()->flash('error', 'Error al activar el usuario.');
+            Log::error('Error en reactivarUsuario: ' . $e->getMessage());
         }
-    }
-    public function cerrarYRecargarVista()
-    {
-        $this->emit('recargarVista');
-    }
-    public function updatePassword($id_usuario)
-    {
-        $this->openModalPassword();
     }
 
     public function render()

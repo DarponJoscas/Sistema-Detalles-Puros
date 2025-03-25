@@ -2,20 +2,14 @@
 
 return [
     'defaults' => [
-        'guard' => 'api',  // Cambiado 'web' a 'api' para usar JWT por defecto
-        'passwords' => 'usuarios',
+        'guard' => 'web',
+        'passwords' => 'users',
     ],
 
     'guards' => [
         'web' => [
             'driver' => 'session',
             'provider' => 'usuarios',
-        ],
-
-        'api' => [
-            'driver' => 'jwt',  // Usar el driver JWT para autenticación de API
-            'provider' => 'usuarios',
-            'hash' => false,  // No es necesario si usas JWT
         ],
     ],
 
@@ -29,11 +23,11 @@ return [
     'passwords' => [
         'usuarios' => [
             'provider' => 'usuarios',
-            'table' => 'password_resets',
-            'expire' => 60, 
-            'throttle' => 60,  
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
         ],
     ],
 
-    'password_timeout' => 10800,  
+    'password_timeout' => 10800,
 ];

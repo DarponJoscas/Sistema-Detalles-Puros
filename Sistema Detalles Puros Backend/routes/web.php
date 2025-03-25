@@ -8,11 +8,8 @@ use App\Livewire\Registros;
 use App\Livewire\DetallePedidos;
 use App\Livewire\InfoPuros;
 use App\Livewire\RegistroUsuarios;
-use App\Livewire\Roles;
 
-
-
-Route::get('/login', Usuarios::class)->name('login');
+Route::get('/', Usuarios::class)->name('login');
 Route::post('/logout', [Usuarios::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', Dashboards::class)->name('dashboard');

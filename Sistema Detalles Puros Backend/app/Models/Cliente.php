@@ -20,7 +20,6 @@ class Cliente extends Model
 
     protected $fillable = [
         'name_cliente',
-        'estado_cliente',
     ];
 
     public $timestamps = true;

@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\DetallePedido;
-
+use Illuminate\Support\Facades\Auth;
 
 class DetallePedidos extends Component
 {
     use WithFileUploads, WithPagination;
 
-    public $estadoPedido = null;
+    public $estadoPedido = "";
 
     public $currentUrl;
 
@@ -38,7 +38,9 @@ class DetallePedidos extends Component
     public $capa;
     public $cantidad_caja;
     public $codigo_empaque;
+    public $id_tipoempaque;
     public $tipo_empaque;
+
 
     public $filtro_cliente = null;
     public $filtro_codigo_puro = null;
@@ -64,7 +66,7 @@ class DetallePedidos extends Component
 
     protected $rules = [
         'codigo_empaque' => 'required|string|max:15|unique:empaque,codigo_empaque',
-        'tipo_empaque' => 'nullable|string|max:50',
+        'id_tipoempaque' => 'required|integer|exists:tipo_empaque,id_tipoempaque',
         'descripcion_empaque' => 'nullable|string|max:255',
         'imagen_anillado' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'imagen_caja' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -75,82 +77,34 @@ class DetallePedidos extends Component
         'imagen_produccion' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ];
 
+
     public function infoPuro()
     {
-        try {
-            if (empty($this->codigo_puro)) {
-                $this->reset([
-                    'presentacion_puro',
-                    'marca',
-                    'alias_vitola',
-                    'vitola',
-                    'capa',
-                    'codigo_puro'
-                ]);
-                $this->error_puro = null;
-                return;
-            }
+        if (empty($this->codigo_puro)) {
+            return;
+        }
 
-            $puro = DB::table('info_puro')
-                ->where('codigo_puro', trim($this->codigo_puro))
-                ->first();
+        $puro = DB::table('info_puro')
+            ->join('marca', 'marca.id_marca', '=', 'info_puro.id_marca')
+            ->join('alias_vitola', 'alias_vitola.id_aliasvitola', '=', 'info_puro.id_aliasvitola')
+            ->join('vitola', 'vitola.id_vitola', '=', 'info_puro.id_vitola')
+            ->join('capa', 'capa.id_capa', '=', 'info_puro.id_capa')
+            ->where('info_puro.codigo_puro', trim($this->codigo_puro))
+            ->select('info_puro.*', 'marca.marca', 'alias_vitola.alias_vitola', 'vitola.vitola', 'capa.capa')
+            ->first();
 
-            if ($puro) {
-
-                $this->codigo_puro = $puro->codigo_puro;
-                $this->presentacion_puro = $puro->presentacion_puro ?? '';
-
-                $marca = DB::table('marca')
-                    ->where('id_marca', $puro->id_marca)
-                    ->first();
-                $this->marca = $marca ? $marca->marca : '';
-
-                $aliasVitola = DB::table('alias_vitola')
-                    ->where('id_aliasvitola', $puro->id_aliasvitola)
-                    ->first();
-                $this->alias_vitola = $aliasVitola ? $aliasVitola->alias_vitola : '';
-
-                $vitola = DB::table('vitola')
-                    ->where('id_vitola', $puro->id_vitola)
-                    ->first();
-                $this->vitola = $vitola ? $vitola->vitola : '';
-
-                $capa = DB::table('capa')
-                    ->where('id_capa', $puro->id_capa)
-                    ->first();
-                $this->capa = $capa ? $capa->capa : '';
-
-                $this->error_puro = null;
-            } else {
-                $this->reset([
-                    'presentacion_puro',
-                    'marca_puro',
-                    'alias_vitola',
-                    'vitola',
-                    'capa',
-                    'codigo_puro',
-                    'id_puro'
-                ]);
-                $this->error_puro = 'Código de puro no encontrado.';
-                Log::error('Código de puro no encontrado', ['codigo_puro' => $this->codigo_puro]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error en infoPuro', [
-                'codigo_puro' => $this->codigo_puro,
-                'error' => $e->getMessage()
-            ]);
-            $this->error_puro = 'Error al procesar la información del puro: ' . $e->getMessage();
-            $this->reset([
-                'presentacion_puro',
-                'marca',
-                'alias_vitola',
-                'vitola',
-                'capa',
-                'codigo_puro',
-                'id_puro'
-            ]);
+        if ($puro) {
+            $this->presentacion_puro = $puro->presentacion_puro ?? '';
+            $this->marca = $puro->marca ?? '';
+            $this->alias_vitola = $puro->alias_vitola ?? '';
+            $this->vitola = $puro->vitola ?? '';
+            $this->capa = $puro->capa ?? '';
+            $this->error_puro = null;
+        } else {
+            $this->error_puro = 'Código de puro no encontrado.';
         }
     }
+
 
 
     public function filtrarPedidos()
@@ -160,15 +114,14 @@ class DetallePedidos extends Component
 
     public function resetFilters()
     {
-        $this->reset([
-            'filtro_cliente',
-            'filtro_codigo_puro',
-            'filtro_presentacion',
-            'filtro_vitola',
-            'filtro_alias_vitola',
-            'filtro_capa',
-            'filtro_codigo_empaque'
-        ]);
+        $this->filtro_cliente = "";
+        $this->filtro_codigo_puro = "";
+        $this->filtro_presentacion = "";
+        $this->filtro_vitola = "";
+        $this->filtro_alias_vitola = "";
+        $this->filtro_capa = "";
+        $this->filtro_codigo_empaque = "";
+
         $this->resetPage();
     }
 
@@ -185,6 +138,10 @@ class DetallePedidos extends Component
         ]);
 
         $collection = collect($results)->map(function ($row) {
+            $tipoEmpaque = DB::table('tipo_empaque')
+                ->where('id_tipoempaque', $row->id_tipoempaque)
+                ->first();
+
             return [
                 'id_pedido' => $row->id_pedido ?? '',
                 'cliente' => $row->name_cliente ?? '',
@@ -197,7 +154,7 @@ class DetallePedidos extends Component
                 'descripcion_produccion' => $row->descripcion_produccion ?? '',
                 'imagen_produccion' => $row->imagen_produccion,
                 'codigo_empaque' => $row->codigo_empaque ?? '',
-                'tipo_empaque' => $row->tipo_empaque ?? '',
+                'tipo_empaque' => $tipoEmpaque ? $tipoEmpaque->nombre : '',
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',
                 'imagen_anillado' => $row->imagen_anillado,
                 'imagen_caja' => $row->imagen_caja,
@@ -205,6 +162,7 @@ class DetallePedidos extends Component
                 'estado_pedido' => $row->estado_pedido ?? '',
             ];
         });
+
 
         $maxRecords = $collection->count();
         $currentPage = $this->getPage();
@@ -358,19 +316,8 @@ class DetallePedidos extends Component
         }
     }
 
-    public function isEmpaquePage()
-    {
-        return str_contains($this->currentUrl, '/empaque');
-    }
-
-    public function isProduccionPage()
-    {
-        return str_contains($this->currentUrl, '/produccion');
-    }
-
     public function editarPedido($id_pedido)
     {
-        // Obtener los datos del pedido
         $pedido = DB::table('detalle_pedido')
             ->join('empaque', 'detalle_pedido.id_empaque', '=', 'empaque.id_empaque')
             ->join('info_puro', 'detalle_pedido.id_puro', '=', 'info_puro.id_puro')
@@ -382,22 +329,19 @@ class DetallePedidos extends Component
             return;
         }
 
-        // Establecer los valores actuales para editar
         $this->id_pedido = $pedido->id_pedido;
         $this->id_cliente = $pedido->id_cliente;
         $this->codigo_puro = $pedido->codigo_puro;
         $this->descripcion_produccion = $pedido->descripcion_produccion;
         $this->codigo_empaque = $pedido->codigo_empaque;
-        $this->tipo_empaque = $pedido->tipo_empaque;
+        $this->tipo_empaque = $pedido->id_tipoempaque;
         $this->descripcion_empaque = $pedido->descripcion_empaque;
         $this->cantidad_caja = $pedido->cantidad_caja;
 
-        // Almacenar las rutas de las imágenes actuales
         $this->imagenProduccionActual = $pedido->imagen_produccion;
         $this->imagenAnilladoActual = $pedido->imagen_anillado;
         $this->imagenCajaActual = $pedido->imagen_caja;
 
-        // Cambiar el modo a edición
         $this->editing = true;
     }
 
@@ -410,9 +354,7 @@ class DetallePedidos extends Component
             $imagenAnilladoPath = $this->imagenAnilladoActual;
             $imagenCajaPath = $this->imagenCajaActual;
 
-            // Manejar las nuevas imágenes si se han cargado
             if ($this->imagen_produccion) {
-                // Eliminar la imagen anterior si existe
                 if ($imagenProduccionPath && Storage::disk('public')->exists($imagenProduccionPath)) {
                     Storage::disk('public')->delete($imagenProduccionPath);
                 }
@@ -430,7 +372,6 @@ class DetallePedidos extends Component
                 );
             }
 
-            // Procesar imagen_anillado si se ha subido una nueva
             if ($this->imagen_anillado) {
                 if ($imagenAnilladoPath && Storage::disk('public')->exists($imagenAnilladoPath)) {
                     Storage::disk('public')->delete($imagenAnilladoPath);
@@ -447,7 +388,6 @@ class DetallePedidos extends Component
                 );
             }
 
-            // Procesar imagen_caja si se ha subido una nueva
             if ($this->imagen_caja) {
                 if ($imagenCajaPath && Storage::disk('public')->exists($imagenCajaPath)) {
                     Storage::disk('public')->delete($imagenCajaPath);
@@ -464,7 +404,6 @@ class DetallePedidos extends Component
                 );
             }
 
-            // Actualizar el detalle del pedido
             DB::table('detalle_pedido')
                 ->where('id_pedido', $this->id_pedido)
                 ->update([
@@ -474,7 +413,6 @@ class DetallePedidos extends Component
                     'updated_at' => now()
                 ]);
 
-            // Actualizar el empaque
             $empaque = DB::table('detalle_pedido')
                 ->where('id_pedido', $this->id_pedido)
                 ->first();
@@ -484,7 +422,7 @@ class DetallePedidos extends Component
                     ->where('id_empaque', $empaque->id_empaque)
                     ->update([
                         'codigo_empaque' => $this->codigo_empaque,
-                        'tipo_empaque' => $this->tipo_empaque,
+                        'id_tipo' => $this->tipo_empaque,
                         'descripcion_empaque' => $this->descripcion_empaque,
                         'imagen_anillado' => $imagenAnilladoPath,
                         'imagen_caja' => $imagenCajaPath,
@@ -536,6 +474,7 @@ class DetallePedidos extends Component
             $this->puros = DB::table('info_puro')->get(['codigo_puro']),
             $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
             $this->clientes = DB::table('clientes')->get(['id_cliente', 'name_cliente']),
+            $this->empaques = DB::table('empaque')->get(['codigo_empaque']),
         ])->extends('layouts.app')->section('content');
     }
 }

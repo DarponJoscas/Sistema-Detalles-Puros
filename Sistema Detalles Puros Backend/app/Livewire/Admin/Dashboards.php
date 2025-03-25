@@ -2,23 +2,37 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+
 
 class Dashboards extends Component
 {
-    public function redirectToPage($page)
+    protected $listeners = ['checkAuthStatus' => 'verifyAuthentication'];
+
+    public function verifyAuthentication()
     {
-        switch ($page) {
-            case 'administracion':
-                return redirect()->route('administracion');
-            case 'produccion':
-                return redirect()->route('produccion');
-            case 'empaque':
-                return redirect()->route('empaque');
-            default:
-                return redirect()->route('dashboard');
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
     }
+
+    public function redirectToPage($page)
+    {
+        $user = Auth::user();
+
+        switch ($page) {
+            case 'administracion':
+                return redirect()->route('administracion')->with('user', $user);
+            case 'produccion':
+                return redirect()->route('produccion')->with('user', $user);
+            case 'empaque':
+                return redirect()->route('empaque')->with('user', $user);
+            default:
+                return redirect()->route('dashboard')->with('user', $user);
+        }
+    }
+
 
     public function render()
     {
