@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        View::composer('*', function ($view) {
+        View::composer('layouts.app', function ($view) {
             if (Auth::check()) {
                 $id_usuario = Auth::user()->id_usuario;
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\DetallePedido;
-use Illuminate\Support\Facades\Auth;
+use App\Models\InfoPuro;
 
 class DetallePedidos extends Component
 {
@@ -20,11 +20,7 @@ class DetallePedidos extends Component
 
     public $currentUrl;
 
-    public $id_cliente;
-    public $descripcion_produccion;
-    public $imagen_produccion;
-    public $descripcion_empaque;
-    public $imagen_anillado;
+    public $id_cliente, $descripcion_produccion, $imagen_produccion, $descripcion_empaque,$imagen_anillado;
     public $imagen_caja;
     public $cantidad_puros;
 
@@ -84,28 +80,21 @@ class DetallePedidos extends Component
             return;
         }
 
-        $puro = DB::table('info_puro')
-            ->join('marca', 'marca.id_marca', '=', 'info_puro.id_marca')
-            ->join('alias_vitola', 'alias_vitola.id_aliasvitola', '=', 'info_puro.id_aliasvitola')
-            ->join('vitola', 'vitola.id_vitola', '=', 'info_puro.id_vitola')
-            ->join('capa', 'capa.id_capa', '=', 'info_puro.id_capa')
-            ->where('info_puro.codigo_puro', trim($this->codigo_puro))
-            ->select('info_puro.*', 'marca.marca', 'alias_vitola.alias_vitola', 'vitola.vitola', 'capa.capa')
+        $puro = InfoPuro::where('codigo_puro', trim($this->codigo_puro))
+            ->with(['marca', 'aliasVitola', 'vitola', 'capa'])
             ->first();
 
         if ($puro) {
             $this->presentacion_puro = $puro->presentacion_puro ?? '';
-            $this->marca = $puro->marca ?? '';
-            $this->alias_vitola = $puro->alias_vitola ?? '';
-            $this->vitola = $puro->vitola ?? '';
-            $this->capa = $puro->capa ?? '';
+            $this->marca = $puro->marca->marca ?? '';
+            $this->alias_vitola = $puro->aliasVitola->alias_vitola ?? '';
+            $this->vitola = $puro->vitola->vitola ?? '';
+            $this->capa = $puro->capa->capa ?? '';
             $this->error_puro = null;
         } else {
             $this->error_puro = 'Código de puro no encontrado.';
         }
     }
-
-
 
     public function filtrarPedidos()
     {
@@ -158,7 +147,6 @@ class DetallePedidos extends Component
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',
                 'imagen_anillado' => $row->imagen_anillado,
                 'imagen_caja' => $row->imagen_caja,
-                'cantidad_caja' => $row->cantidad_caja ?? '',
                 'estado_pedido' => $row->estado_pedido ?? '',
             ];
         });
@@ -418,7 +406,7 @@ class DetallePedidos extends Component
                 ->first();
 
             if ($empaque && $empaque->id_empaque) {
-                DB::table('empaque')
+                DB::table('info_empaque')
                     ->where('id_empaque', $empaque->id_empaque)
                     ->update([
                         'codigo_empaque' => $this->codigo_empaque,
@@ -463,6 +451,7 @@ class DetallePedidos extends Component
 
         $this->editing = false;
     }
+
     public function render()
     {
         return view('livewire.detalle-pedidos', [
@@ -474,7 +463,7 @@ class DetallePedidos extends Component
             $this->puros = DB::table('info_puro')->get(['codigo_puro']),
             $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
             $this->clientes = DB::table('clientes')->get(['id_cliente', 'name_cliente']),
-            $this->empaques = DB::table('empaque')->get(['codigo_empaque']),
+            $this->empaques = DB::table('info_empaque')->get(['codigo_empaque']),
         ])->extends('layouts.app')->section('content');
     }
 }

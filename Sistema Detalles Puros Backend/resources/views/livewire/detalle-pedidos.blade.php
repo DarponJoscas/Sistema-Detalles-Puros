@@ -187,12 +187,14 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                     </div>
+                                    @if ($id_rol != 2 && $id_rol != 3)
                                     <div class="d-inline-block m-1">
                                         <button type="button" class="btn btn-danger"
                                             wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

@@ -330,7 +330,7 @@ class InfoPuros extends Component
     {
         try {
             set_time_limit(300);
-            $apiUrl = env('APP_URL') . 'materia_prima/productos';
+            $apiUrl = env('APP_URL') . '/public/api/materia_prima/productos';
             $response = Http::timeout(30)->get($apiUrl);
 
             if (!$response->successful()) {

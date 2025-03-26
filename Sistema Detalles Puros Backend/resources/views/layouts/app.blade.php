@@ -164,7 +164,7 @@
                         <li class="nav-item">
                             <form action="{{ route('puros') }}" method="GET">
                                 <button type="submit" class="nav-link btn btn-link"
-                                    style="color: white; text-decoration: none;">Registro Puros</button>
+                                    style="color: white; text-decoration: none;">Puros</button>
                             </form>
                         </li>
                     @endif
@@ -183,6 +183,15 @@
                             <form action="{{ route('usuarios') }}" method="GET">
                                 <button type="submit" class="nav-link btn btn-link"
                                     style="color: white; text-decoration: none;">Usuarios</button>
+                            </form>
+                        </li>
+                    @endif
+
+                    @if (!in_array(request()->path(), ['bitacora']))
+                        <li class="nav-item">
+                            <form action="{{ route('bitacora') }}" method="GET">
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Bitacora</button>
                             </form>
                         </li>
                     @endif
@@ -262,25 +271,25 @@
 
         });
 
-        document.addEventListener('DOMContentLoaded', function () {
-        const logoutIcon = document.getElementById('logout-icon');
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutIcon = document.getElementById('logout-icon');
 
-        logoutIcon.addEventListener('click', function () {
+            logoutIcon.addEventListener('click', function() {
 
-            const logoutForm = document.createElement('form');
-            logoutForm.method = 'POST';
-            logoutForm.action = '{{ route('logout') }}';
+                const logoutForm = document.createElement('form');
+                logoutForm.method = 'POST';
+                logoutForm.action = '{{ route('logout') }}';
 
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            logoutForm.appendChild(csrfToken);
-            document.body.appendChild(logoutForm);
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                logoutForm.appendChild(csrfToken);
+                document.body.appendChild(logoutForm);
 
-            logoutForm.submit();
+                logoutForm.submit();
+            });
         });
-    });
     </script>
 </body>
 
