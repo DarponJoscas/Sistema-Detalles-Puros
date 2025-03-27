@@ -23,6 +23,7 @@ class Vitola extends Model
     protected $fillable = [
         'id_vitola',
         'vitola',
+        'estado_vitola',
     ];
 
     public $timestamps = true;

@@ -175,7 +175,6 @@ class InfoPuros extends Component
         }
     }
 
-
     public function openModal()
     {
         $this->showModal = true;
@@ -326,6 +325,23 @@ class InfoPuros extends Component
         }
     }
 
+    public function reactivarPuro($codigoPuro)
+    {
+        try {
+            $reactivar = InfoPuro::where('codigo_puro', $codigoPuro)->update(['estado_puro' => 1]);
+
+            if ($reactivar) {
+                $this->dispatch('refresh');
+                session()->flash('success', 'Se ha activado correctamente el puro.');
+            } else {
+                session()->flash('error', 'No se encontró el registro para activar.');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al activar el puro.');
+            Log::error('Error en reactivarPuro: ' . $e->getMessage());
+        }
+    }
+
     public function importProducts()
     {
         try {
@@ -370,6 +386,7 @@ class InfoPuros extends Component
                     [
                         'id_marca' => $product['id_marca'],
                         'marca' => $product['marca'],
+                        'estado_marca'=> 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -380,6 +397,7 @@ class InfoPuros extends Component
                     [
                         'id_vitola' => $product['id_vitola'],
                         'vitola' => $product['vitola'],
+                        'estado_vitola'=> 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -390,6 +408,7 @@ class InfoPuros extends Component
                     [
                         'id_aliasvitola' => $product['id_nombre'],
                         'alias_vitola' => $product['nombre'],
+                        'estado_aliasVitola'=> 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -400,6 +419,7 @@ class InfoPuros extends Component
                     [
                         'id_capa' => $product['id_capa'],
                         'capa' => $product['capa'],
+                        'estado_capa'=> 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]

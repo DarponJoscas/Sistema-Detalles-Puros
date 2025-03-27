@@ -1,4 +1,18 @@
 <div>
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+    </style>
     <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
         <div>
             <div>
@@ -62,11 +76,15 @@
                 </div>
             </div>
             <div class="d-flex justify-content-between mt-2">
-                <button class="btn btn-primary" wire:click="importProducts">Cargar Puros</button>
-                <button class="btn btn-primary" wire:click="importProducts">Crear Marca</button>
-                <button class="btn btn-primary" wire:click="importProducts">Crear Vitola</button>
-                <button class="btn btn-primary" wire:click="importProducts">Crear Alias Vitola</button>
-                <button class="btn btn-primary" wire:click="importProducts">Crear Capa</button>
+                <div wire:loading.flex class="loading-overlay">
+                    <div class="spinner-border text-dark" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" wire:click="importProducts" wire:loading.remove>
+                    Cargar Puros
+                </button>
             </div>
             <div class="mt-3">
                 @if ($processedCount > 0)

@@ -127,9 +127,6 @@ class DetallePedidos extends Component
         ]);
 
         $collection = collect($results)->map(function ($row) {
-            $tipoEmpaque = DB::table('tipo_empaque')
-                ->where('id_tipoempaque', $row->id_tipoempaque)
-                ->first();
 
             return [
                 'id_pedido' => $row->id_pedido ?? '',
@@ -143,7 +140,7 @@ class DetallePedidos extends Component
                 'descripcion_produccion' => $row->descripcion_produccion ?? '',
                 'imagen_produccion' => $row->imagen_produccion,
                 'codigo_empaque' => $row->codigo_empaque ?? '',
-                'tipo_empaque' => $tipoEmpaque ? $tipoEmpaque->nombre : '',
+
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',
                 'imagen_anillado' => $row->imagen_anillado,
                 'imagen_caja' => $row->imagen_caja,

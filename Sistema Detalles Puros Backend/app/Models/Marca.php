@@ -23,6 +23,7 @@ class Marca extends Model
     protected $fillable = [
         'id_marca',
         'marca',
+        'estado_marca',
     ];
 
     public $timestamps = true;

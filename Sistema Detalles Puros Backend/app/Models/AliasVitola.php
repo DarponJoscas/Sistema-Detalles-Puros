@@ -23,6 +23,7 @@ class AliasVitola extends Model
     [
         'id_aliasvitola',
         'alias_vitola',
+        'estado_aliasVitola',
     ];
 
 

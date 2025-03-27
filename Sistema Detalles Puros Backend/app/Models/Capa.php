@@ -23,6 +23,7 @@ class Capa extends Model
     protected $fillable = [
        'id_capa',
        'capa',
+       'estado_capa',
     ];
 
     public $timestamps = true;

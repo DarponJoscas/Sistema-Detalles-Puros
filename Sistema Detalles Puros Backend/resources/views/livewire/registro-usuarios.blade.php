@@ -233,6 +233,7 @@
                 Livewire.on('hide-password-modal', () => {
                     passwordModal.hide();
                 });
+
                 new TomSelect('#filtroUsuarios');
                 new TomSelect('#filtroRoles');
             });

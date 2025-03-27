@@ -20,7 +20,7 @@ class Bitacoras extends Component
     public $filtro_accion = null;
     public $filtro_usuario = null;
 
-    public $usuarios;
+    public $usuarios, $acciones, $descripciones;
 
     public function filtrarBitacora()
     {
@@ -62,6 +62,8 @@ class Bitacoras extends Component
     {
         return view('livewire.bitacoras',[
             'datosPaginados' => $this->getDatosBitacora(),
+            $this->descripciones = DB::table('bitacora')->distinct()->get(['descripcion']),
+            $this->acciones = DB::table('bitacora')->distinct()->get(['accion']),
             $this->usuarios = DB::table('usuarios')->get(['id_usuario', 'name_usuario']),
         ])->extends('layouts.app')->section('content');
     }

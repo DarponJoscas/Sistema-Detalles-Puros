@@ -122,11 +122,11 @@
                             @endif
                             @if (!in_array(request()->path(), ['produccion']))
                                 <th>Código Ítem</th>
-                                <th>Tipo Empaque</th>
+
                                 <th>Descripción Empaque</th>
                                 <th>Imagen Anillado</th>
                                 <th>Imagen Caja</th>
-                                <th>Cantidad Caja</th>
+
                             @endif
                             <th>Acciones</th>
                         </tr>
@@ -159,7 +159,7 @@
 
                                 @if (!in_array(request()->path(), ['empaque']))
                                     <td>{{ $dato['codigo_empaque'] }}</td>
-                                    <td>{{ $dato['tipo_empaque'] }}</td>
+
                                     <td>{{ $dato['descripcion_empaque'] }}</td>
                                     <td>
                                         @if ($dato['imagen_anillado'])
@@ -178,7 +178,6 @@
                                             <span class="text-muted">Sin Imagen</span>
                                         @endif
                                     </td>
-                                    <td>{{ $dato['cantidad_caja'] }}</td>
                                 @endif
                                 <td>
                                     <div class="d-inline-block m-1">
@@ -187,14 +186,14 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                     </div>
-                                    @if ($id_rol != 2 && $id_rol != 3)
+
                                     <div class="d-inline-block m-1">
                                         <button type="button" class="btn btn-danger"
                                             wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
-                                    @endif
+
                                 </td>
                             </tr>
                         @endforeach
