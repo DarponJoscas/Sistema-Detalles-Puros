@@ -105,6 +105,7 @@
             margin-top: 5px;
         }
     </style>
+
     <div id="login">
         <div class="form-container">
             <div class="form-icon">
@@ -138,8 +139,9 @@
                     <p class="success-message text-center">{{ $success_message }}</p>
                 @endif
 
-                <button type="button" class="btn btn-primary" wire:click="login" >Ingresar</button>
+                <button type="button" class="btn btn-primary" wire:click="login">Ingresar</button>
             </form>
         </div>
     </div>
+
 </div>

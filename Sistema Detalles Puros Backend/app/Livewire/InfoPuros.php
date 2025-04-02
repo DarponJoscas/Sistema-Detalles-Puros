@@ -26,7 +26,7 @@ class InfoPuros extends Component
     public $totalCount = 0;
 
     public $presentacion_puro, $marca, $alias_vitola, $vitola, $capa, $codigo_puro;
-    public $id_marca, $id_vitola, $id_aliasvitola, $id_capa, $estado_puro = 1;
+    public $id_marca, $id_vitola, $id_aliasvitola, $id_capa, $estado_puro = 1, $id_puro;
 
     public $presentaciones = [], $marcas = [], $alias_vitolas = [], $vitolas = [], $capas = [], $puros = [];
     public $editing = false;
@@ -279,6 +279,7 @@ class InfoPuros extends Component
 
         $collection = collect($results)->map(function ($row) {
             return [
+                'id_puro' => $row->id_puro,
                 'codigo_puro' => $row->codigo_puro ?? '',
                 'presentacion_puro' => $row->presentacion_puro ?? '',
                 'marca' => $row->marca ?? '',

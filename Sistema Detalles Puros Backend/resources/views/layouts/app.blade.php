@@ -164,7 +164,16 @@
                         <li class="nav-item">
                             <form action="{{ route('puros') }}" method="GET">
                                 <button type="submit" class="nav-link btn btn-link"
-                                    style="color: white; text-decoration: none;">Puros</button>
+                                    style="color: white; text-decoration: none;">Información de Puros</button>
+                            </form>
+                        </li>
+                    @endif
+
+                    @if (!in_array(request()->path(), ['infoempaque']))
+                        <li class="nav-item">
+                            <form action="{{ route('infoempaque') }}" method="GET">
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Información de Empaque</button>
                             </form>
                         </li>
                     @endif
@@ -251,24 +260,23 @@
             overlay.addEventListener("click", closeSidebarFunc);
         }
 
-        // Cargar nombre del usuario desde la API
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Tom Select
-            new TomSelect('#codigoPuro');
-            new TomSelect('#presentacionPuro');
-            new TomSelect('#marca');
-            new TomSelect('#vitola');
-            new TomSelect('#aliasVitola');
-            new TomSelect('#capa');
-            new TomSelect('#cliente');
-            new TomSelect('#codigoItem');
-            new TomSelect('#select-cliente');
-            new TomSelect('#select-codigo-puro');
-            new TomSelect('#roles');
-            new TomSelect('#marcas');
-            new TomSelect('#tipoEmpaque');
+            let selectIds = [
+                'cliente', 'codigoPuro', 'presentacionPuro', 'marca',
+                'vitola', 'aliasVitola', 'capa', 'codigoItem',
+                'roles', 'marcas', 'tipoEmpaque', 'codigoEmpaque'
+            ];
 
-
+            selectIds.forEach(id => {
+                let selectElement = document.getElementById(id);
+                if (selectElement) {
+                    selectElement.tomselect = new TomSelect(selectElement, {
+                        allowEmptyOption: true,
+                        create: false,
+                        persist: false
+                    });
+                }
+            });
         });
 
         document.addEventListener('DOMContentLoaded', function() {

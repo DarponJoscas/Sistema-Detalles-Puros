@@ -1,8 +1,8 @@
 <div>
-    <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
-        <div>
-            <div class="row g-0">
-                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+    <div>
+        <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
+            <div wire:ignore class="row g-0">
+                <div class="col px-1" style="width: 160px; flex: none;">
                     <select id="cliente" wire:model="filtro_cliente" wire:change="filtrarPedidos">
                         <option value="">Buscar un cliente</option>
                         @foreach ($clientes as $cliente)
@@ -68,7 +68,7 @@
                     </select>
                 </div>
 
-                <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                <div class="col px-1" style="width: 160px; flex: none;">
                     <select id="codigoItem" wire:model="filtro_codigo_empaque" wire:change="filtrarPedidos">
                         <option value="">Buscar item</option>
                         @foreach ($empaques as $empaque)
@@ -79,7 +79,7 @@
             </div>
 
             <div class="mt-2">
-                <button type="button" class="btn btn-secondary" wire:click="resetFilters">
+                <button type="button" class="btn btn-secondary" onclick="limpiarFiltros()">
                     Resetear Filtros
                 </button>
 
@@ -104,102 +104,100 @@
             @endif
 
             <!-- Vista para mostrar los registros de Pedido-->
-            <div class="table-responsive text-center">
+            <div class="table-responsive text-center" wire:ignore.self>
                 <table class="table mt-3 mx-auto text-center align-middle">
                     <thead class="text-center">
                         <tr>
-                            <th>N°</th>
+                            <th>N° Pedido</th>
                             <th>Cliente</th>
                             <th>Código Puro</th>
-                            <th>Presentación Puro</th>
-                            <th>Marca Puro</th>
-                            <th>Alias Vitola</th>
+                            <th>Presentación</th>
+                            <th>Marca</th>
                             <th>Vitola</th>
-                            <th>Capa Puro</th>
-                            @if (!in_array(request()->path(), ['empaque']))
-                                <th>Descripción Producción</th>
-                                <th>Imagen Producción</th>
-                            @endif
-                            @if (!in_array(request()->path(), ['produccion']))
-                                <th>Código Ítem</th>
-
-                                <th>Descripción Empaque</th>
-                                <th>Imagen Anillado</th>
-                                <th>Imagen Caja</th>
-
-                            @endif
+                            <th>Alias Vitola</th>
+                            <th>Capa</th>
+                            <th>Descripción Producción</th>
+                            <th>Imagen Producción</th>
+                            <th>Código Empaque</th>
+                            <th>Sampler</th>
+                            <th>Descripción Empaque</th>
+                            <th>Anillo</th>
+                            <th>Imagen Anillado</th>
+                            <th>Sello</th>
+                            <th>UPC</th>
+                            <th>Tipo Empaque</th>
+                            <th>Código Caja</th>
+                            <th>Imagen Caja</th>
+                            <th>Estado Pedido</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
                         @foreach ($datosPaginados as $dato)
                             <tr>
-                                <td style="display: none;">{{ $dato['id_pedido'] }}</td>
-                                <td>{{ ($datosPaginados->currentPage() - 1) * $datosPaginados->perPage() + $loop->iteration }}
-                                </td>
+                                <td>{{ $dato['id_pedido'] }}</td>
                                 <td>{{ $dato['cliente'] }}</td>
                                 <td>{{ $dato['codigo_puro'] }}</td>
                                 <td>{{ $dato['presentacion_puro'] }}</td>
                                 <td>{{ $dato['marca'] }}</td>
-                                <td>{{ $dato['alias_vitola'] }}</td>
                                 <td>{{ $dato['vitola'] }}</td>
+                                <td>{{ $dato['alias_vitola'] }}</td>
                                 <td>{{ $dato['capa'] }}</td>
-                                @if (!in_array(request()->path(), ['produccion']))
-                                    <td>{{ $dato['descripcion_produccion'] }}</td>
-                                    <td>
-                                        @if ($dato['imagen_produccion'])
-                                            <img src="{{ asset('storage/' . $dato['imagen_produccion']) }}"
-                                                alt="Imagen Producción" width="100" height="100"
-                                                class="d-block mx-auto rounded">
-                                        @else
-                                            <span class="text-muted">Sin Imagen</span>
-                                        @endif
-                                    </td>
-                                @endif
-
-                                @if (!in_array(request()->path(), ['empaque']))
-                                    <td>{{ $dato['codigo_empaque'] }}</td>
-
-                                    <td>{{ $dato['descripcion_empaque'] }}</td>
-                                    <td>
-                                        @if ($dato['imagen_anillado'])
-                                            <img src="{{ asset('storage/' . $dato['imagen_anillado']) }}"
-                                                alt="Imagen Anillado" width="100" height="100"
-                                                class="d-block mx-auto rounded">
-                                        @else
-                                            <span class="text-muted">Sin Imagen</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($dato['imagen_caja'])
-                                            <img src="{{ asset('storage/' . $dato['imagen_caja']) }}" alt="Imagen Caja"
-                                                width="100" height="100" class="d-block mx-auto rounded">
-                                        @else
-                                            <span class="text-muted">Sin Imagen</span>
-                                        @endif
-                                    </td>
-                                @endif
+                                <td>{{ $dato['descripcion_produccion'] }}</td>
+                                <td>
+                                    @if ($dato['imagen_produccion'])
+                                        <img src="{{ asset('storage/' . $dato['imagen_produccion']) }}"
+                                            alt="Imagen Producción" width="100" height="100"
+                                            class="d-block mx-auto rounded">
+                                    @else
+                                        <span class="text-muted">Sin Imagen</span>
+                                    @endif
+                                </td>
+                                <td>{{ $dato['codigo_empaque'] }}</td>
+                                <td>{{ $dato['sampler'] }}</td>
+                                <td>{{ $dato['descripcion_empaque'] }}</td>
+                                <td>{{ $dato['anillo'] }}</td>
+                                <td>
+                                    @if ($dato['imagen_anillado'])
+                                        <img src="{{ asset('storage/' . $dato['imagen_anillado']) }}"
+                                            alt="Imagen Anillado" width="100" height="100"
+                                            class="d-block mx-auto rounded">
+                                    @else
+                                        <span class="text-muted">Sin Imagen</span>
+                                    @endif
+                                </td>
+                                <td>{{ $dato['sello'] }}</td>
+                                <td>{{ $dato['upc'] }}</td>
+                                <td>{{ $dato['tipo_empaque'] }}</td>
+                                <td>{{ $dato['codigo_caja'] }}</td>
+                                <td>
+                                    @if ($dato['imagen_caja'])
+                                        <img src="{{ asset('storage/' . $dato['imagen_caja']) }}" alt="Imagen Caja"
+                                            width="100" height="100" class="d-block mx-auto rounded">
+                                    @else
+                                        <span class="text-muted">Sin Imagen</span>
+                                    @endif
+                                </td>
+                                <td>{{ $dato['estado_pedido'] }}</td>
                                 <td>
                                     <div class="d-inline-block m-1">
                                         <button type="button" class="btn btn-warning"
                                             wire:click="editarPedido({{ $dato['id_pedido'] }})">
-                                            <i class="bi bi-pencil-square"></i>
+                                            <i class="bi bi-pencil-square text-white"></i>
                                         </button>
                                     </div>
 
-                                    <div class="d-inline-block m-1">
+                                    <div class="d-inline-block">
                                         <button type="button" class="btn btn-danger"
                                             wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
-
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-
                 <div class="mt-4">
                     {{ $datosPaginados->links() }}
                 </div>
@@ -209,12 +207,16 @@
 
     <!-- Modal de Registro de Pedido-->
     <div class="modal fade" id="registrarpedidoempaqueModal" tabindex="-1" aria-labelledby="registrarPedidoLabel"
-        aria-hidden="true" wire:ignore.self x-init="$el.addEventListener('shown.bs.modal', () => window.dispatchEvent(new CustomEvent('modal-opened')))">
+    wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="registrarPedidoLabel">
-                        {{ $editing ? 'Editar Pedido' : 'Registrar Nuevo Pedido' }}
+                        @if ($id_pedido)
+                            Editar Detalle Pedido
+                        @else
+                            Crear Detalle Pedido
+                        @endif
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         title="Cerrar modal"></button>
@@ -235,16 +237,23 @@
                         </div>
 
                         <div class="form-group mb-3" wire:ignore>
-                            <label for="codigo_puro">Código de Puro:</label>
-                            <select wire:model="codigo_puro" id="select-codigo-puro" wire:change="infoPuro">
-                                <option value="">Seleccione un código</option>
-                                @foreach ($puros as $puro)
-                                    <option value="{{ $puro->codigo_puro }}">{{ $puro->codigo_puro }}</option>
+                            <label for="codigo_empaque">Código de Empaque:</label>
+                            <select wire:model="codigo_empaque" id="select-codigo-empaque" wire:change="infoEmpaque">
+                                <option value="">Seleccione un código de empaque</option>
+                                @foreach ($empaques as $empaque)
+                                    <option value="{{ $empaque->codigo_empaque }}">{{ $empaque->codigo_empaque }}
+                                    </option>
                                 @endforeach
                             </select>
-                            @error('codigo_puro')
+                            @error('codigo_empaque')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="codigo_puro">Código de Puro:</label>
+                            <input type="text" wire:model="codigo_puro" id="codigo_puro" class="form-control"
+                                readonly>
                         </div>
 
                         <div class="form-group mb-3">
@@ -274,101 +283,106 @@
                             <input type="text" wire:model="capa" id="capa" class="form-control" readonly>
                         </div>
 
-                        @if (!in_array(request()->path(), ['empaque']))
-                            <div class="form-group mb-3">
-                                <label for="descripcion_produccion">Descripción Produccion:</label>
-                                <input type="text" wire:model="descripcion_produccion" id="descripcion_produccion"
-                                    class="form-control">
-                            </div>
+                        <div class="form-group mb-3">
+                            <label for="tipo_empaque">Tipo de Empaque:</label>
+                            <input type="text" wire:model="tipo_empaque" id="tipo_empaque" class="form-control"
+                                readonly>
+                        </div>
 
-                            <div class="form-group mb-3">
-                                <label for="imagen_produccion">Imagen de Producción:</label>
-                                <input type="file" wire:model="imagen_produccion" id="imagen_produccion"
-                                    class="form-control">
-                                @if ($imagen_produccion && is_object($imagen_produccion))
-                                    <div class="mt-2">
-                                        <img src="{{ $imagen_produccion->temporaryUrl() }}" class="img-thumbnail"
-                                            width="150">
-                                    </div>
-                                @elseif ($imagen_produccion && !is_object($imagen_produccion))
-                                    <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $imagen_produccion) }}" class="img-thumbnail"
-                                            width="150">
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
+                        <div class="form-group mb-3">
+                            <label for="sampler">Sampler:</label>
+                            <input type="text" wire:model="sampler" id="sampler" class="form-control" readonly>
+                        </div>
 
-                        @if (!in_array(request()->path(), ['produccion']))
-                            <div class="form-group mb-3">
-                                <label for="codigo_empaque">Código ítem:</label>
-                                <input type="text" wire:model="codigo_empaque" id="codigo_empaque"
-                                    class="form-control">
-                                @error('codigo_empaque')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                        <div class="form-group mb-3">
+                            <label for="descripcion_empaque">Descripción Empaque:</label>
+                            <input type="text" wire:model="descripcion_empaque" id="descripcion_empaque"
+                                class="form-control">
+                        </div>
 
-                            <div class="form-group mb-3">
-                                <label for="tipo_empaque">Tipo de Empaque:</label>
-                                <input type="text" wire:model="tipo_empaque" id="tipo_empaque"
-                                    class="form-control">
-                                @error('tipo_empaque')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                        <div class="form-group mb-3">
+                            <label for="anillo">Anillo:</label>
+                            <input type="text" wire:model="anillo" id="anillo" class="form-control" readonly>
+                        </div>
 
-                            <div class="form-group mb-3">
-                                <label for="imagen_anillado">Imagen de Anillado:</label>
-                                <input type="file" wire:model="imagen_anillado" id="imagen_anillado"
-                                    class="form-control">
-                                @if ($imagen_anillado && is_object($imagen_anillado))
-                                    <div class="mt-2">
-                                        <img src="{{ $imagen_anillado->temporaryUrl() }}" class="img-thumbnail"
-                                            width="150">
-                                    </div>
-                                @elseif ($imagen_anillado && !is_object($imagen_anillado))
-                                    <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $imagen_anillado) }}" class="img-thumbnail"
-                                            width="150">
-                                    </div>
-                                @endif
-                            </div>
+                        <div class="form-group mb-3">
+                            <label for="imagen_anillado">Imagen de Anillado:</label>
+                            <input type="file" wire:model="imagen_anillado" id="imagen_anillado"
+                                class="form-control">
+                            @if ($imagen_anillado && is_object($imagen_anillado))
+                                <div class="mt-2">
+                                    <img src="{{ $imagen_anillado->temporaryUrl() }}" class="img-thumbnail"
+                                        width="150">
+                                </div>
+                            @elseif ($imagen_anillado && !is_object($imagen_anillado))
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $imagen_anillado) }}" class="img-thumbnail"
+                                        width="150">
+                                </div>
+                            @endif
+                        </div>
 
-                            <div class="form-group mb-3">
-                                <label for="imagen_caja">Imagen de Caja:</label>
-                                <input type="file" wire:model="imagen_caja" id="imagen_caja"
-                                    class="form-control">
-                                @if ($imagen_caja && is_object($imagen_caja))
-                                    <div class="mt-2">
-                                        <img src="{{ $imagen_caja->temporaryUrl() }}" class="img-thumbnail"
-                                            width="150">
-                                    </div>
-                                @elseif ($imagen_caja && !is_object($imagen_caja))
-                                    <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $imagen_caja) }}" class="img-thumbnail"
-                                            width="150">
-                                    </div>
-                                @endif
-                            </div>
+                        <div class="form-group mb-3">
+                            <label for="sello">Sello:</label>
+                            <input type="text" wire:model="sello" id="sello" class="form-control" readonly>
+                        </div>
 
-                            <div class="form-group mb-3">
-                                <label for="cantidad_caja">Cantidad de Cajas:</label>
-                                <input type="number" wire:model="cantidad_caja" id="cantidad_caja"
-                                    class="form-control">
-                                @error('cantidad_caja')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        @endif
+                        <div class="form-group mb-3">
+                            <label for="upc">UPC:</label>
+                            <input type="text" wire:model="upc" id="upc" class="form-control" readonly>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="codigo_caja">Código Caja:</label>
+                            <input type="text" wire:model="codigo_caja" id="codigo_caja" class="form-control"
+                                readonly>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="imagen_caja">Imagen de Caja:</label>
+                            <input type="file" wire:model="imagen_caja" id="imagen_caja" class="form-control">
+                            @if ($imagen_caja && is_object($imagen_caja))
+                                <div class="mt-2">
+                                    <img src="{{ $imagen_caja->temporaryUrl() }}" class="img-thumbnail"
+                                        width="150">
+                                </div>
+                            @elseif ($imagen_caja && !is_object($imagen_caja))
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $imagen_caja) }}" class="img-thumbnail"
+                                        width="150">
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="descripcion_produccion">Descripción Producción:</label>
+                            <input type="text" wire:model="descripcion_produccion" id="descripcion_produccion"
+                                class="form-control">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="imagen_produccion">Imagen de Producción:</label>
+                            <input type="file" wire:model="imagen_produccion" id="imagen_produccion"
+                                class="form-control">
+                            @if ($imagen_produccion && is_object($imagen_produccion))
+                                <div class="mt-2">
+                                    <img src="{{ $imagen_produccion->temporaryUrl() }}" class="img-thumbnail"
+                                        width="150">
+                                </div>
+                            @elseif ($imagen_produccion && !is_object($imagen_produccion))
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $imagen_produccion) }}" class="img-thumbnail"
+                                        width="150">
+                                </div>
+                            @endif
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        wire:click="closeEmpaqueModal">Cerrar</button>
                     <button type="button" class="btn btn-primary"
-                        wire:click="{{ $editing ? 'actualizarPedido' : 'crearDetallePedidoYEmpaque' }}">
-                        {{ $editing ? 'Actualizar Pedido' : 'Guardar Pedido' }}
-                    </button>
+                        wire:click="crearDetallePedido">Guardar</button>
                 </div>
             </div>
         </div>
@@ -376,9 +390,38 @@
 
     @push('scripts')
         <script>
-            document.addEventListener('livewire:load', function() {
-                Livewire.emit('checkAuthStatus');
+            document.addEventListener('DOMContentLoaded', function() {
+
+                const pedidoModal = new bootstrap.Modal(document.getElementById('registrarpedidoempaqueModal'));
+
+                Livewire.on('hide-edit-modal', () => {
+                    pedidoModal.hide();
+                });
+
+                Livewire.on('show-edit-modal', () => {
+                    pedidoModal.show();
+                });
+
+                new TomSelect('#select-cliente');
+                new TomSelect('#select-codigo-empaque');
             });
+
+            function limpiarFiltros() {
+                let selectIds = [
+                    'cliente', 'codigoPuro', 'presentacionPuro', 'marca',
+                    'vitola', 'aliasVitola', 'capa', 'codigoItem'
+                ];
+
+                selectIds.forEach(id => {
+                    let selectElement = document.getElementById(id);
+                    if (selectElement && selectElement.tomselect) {
+                        selectElement.tomselect.clear();
+                    }
+                });
+
+                Livewire.dispatch('resetFilters');
+            }
         </script>
     @endpush
+
 </div>

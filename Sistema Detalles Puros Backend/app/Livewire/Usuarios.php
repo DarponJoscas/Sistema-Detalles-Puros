@@ -77,7 +77,7 @@ class Usuarios extends Component
 
         Auth::login($user);
 
-        switch ($user->id_rol){
+        switch ($user->id_rol) {
             case 1:
                 return redirect()->route('dashboard');
             case 2:
@@ -92,6 +92,8 @@ class Usuarios extends Component
     public function logout()
     {
         try {
+            session()->forget('id_usuario');
+
             Auth::logout();
 
             $this->success_message = 'Has cerrado sesión exitosamente.';

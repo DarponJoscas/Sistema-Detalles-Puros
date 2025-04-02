@@ -130,9 +130,7 @@
                     <tbody class="text-center">
                         @foreach ($datosPaginados as $dato)
                             <tr class="{{ $dato['estado_puro'] == 0 ? 'table-secondary text-muted' : '' }}">
-                                <td style="width: 5%">
-                                    {{ ($datosPaginados->currentPage() - 1) * $datosPaginados->perPage() + $loop->iteration }}
-                                </td>
+                                <td style="width: 5%">{{ $dato['id_puro']}}</td>
                                 <td>{{ $dato['codigo_puro'] }}</td>
                                 <td>{{ $dato['presentacion_puro'] }}</td>
                                 <td>{{ $dato['marca'] }}</td>

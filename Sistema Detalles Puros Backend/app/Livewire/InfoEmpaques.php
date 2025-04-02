@@ -9,11 +9,67 @@ use App\Models\InfoPuro;
 use App\Models\InfoEmpaque;
 use App\Models\TipoEmpaque;
 use Illuminate\Support\Facades\Log;
+use Livewire\WithPagination;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class InfoEmpaques extends Component
 {
+    use WithPagination;
+
     public $totalGuardados = 0;
     public $totalNoGuardados = 0;
+    public $filtro_codigo_empaque = null, $filtro_codigo_puro = null, $filtro_tipo_empaque = null;
+    public $empaques = [], $puros = [], $tiposEmpaque = [], $imagen_anillado;
+    public $perPage = 25;
+    public $page = 1;
+    protected $paginationTheme = 'bootstrap';
+
+    public function filtrarEmpaque()
+    {
+        $this->resetPage();
+    }
+
+    public function getInfoEmpaque()
+    {
+        $results = DB::select("CALL GetInfoEmpaque(?, ?, ?)", [
+            $this->filtro_codigo_empaque,
+            $this->filtro_codigo_puro,
+            $this->filtro_tipo_empaque
+        ]);
+
+        $collection = collect($results)->map(function ($row) {
+            return [
+                'id_empaque' => $row->id_empaque ?? '',
+                'codigo_empaque' => $row->codigo_empaque ?? '',
+                'codigo_puro' => $row->codigo_puro ?? '',
+                'presentacion_puro' => $row->presentacion_puro ?? '',
+                'sampler' => $row->sampler ?? '',
+                'tipo_empaque' => $row->tipo_empaque ?? '',
+                'descripcion_empaque' => $row->descripcion_empaque ?? '',
+                'anillo' => $row->anillo ?? '',
+                'imagen_anillado' => $row->imagen_anillado ?? '',
+                'sello' => $row->sello ?? '',
+                'upc' => $row->upc ?? '',
+                'codigo_caja' => $row->codigo_caja ?? '',
+                'imagen_caja' => $row->imagen_caja ?? '',
+                'estado_empaque' => $row->estado_empaque ?? '',
+                'created_at' => $row->created_at ?? '',
+                'updated_at' => $row->updated_at ?? ''
+            ];
+        });
+
+        $maxRecords = $collection->count();
+        $currentPage = $this->getPage();
+        $items = $collection->forPage($currentPage, $this->perPage)->values();
+
+        return new LengthAwarePaginator(
+            $items,
+            $maxRecords,
+            $this->perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+    }
 
     public function importEmpaque()
     {
@@ -84,7 +140,6 @@ class InfoEmpaques extends Component
 
                     Log::info('Registro guardado exitosamente: ' . json_encode($empaque));
                     $guardados++;
-
                 } catch (\Exception $e) {
                     Log::error('Error al procesar empaque: ' . json_encode($empaque) . ' - ' . $e->getMessage());
                     $noGuardados++;
@@ -94,7 +149,6 @@ class InfoEmpaques extends Component
             DB::commit();
             $this->totalGuardados = $guardados;
             $this->totalNoGuardados = $noGuardados;
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error general en la importación de empaques: ' . $e->getMessage());
@@ -104,6 +158,7 @@ class InfoEmpaques extends Component
     public function render()
     {
         return view('livewire.info-empaques', [
+            'datosPaginados' => $this->getInfoEmpaque(),
             'totalGuardados' => $this->totalGuardados,
             'totalNoGuardados' => $this->totalNoGuardados
         ])->extends('layouts.app')->section('content');

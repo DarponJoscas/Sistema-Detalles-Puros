@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\DetallePedido;
+use App\Models\InfoEmpaque;
 use App\Models\InfoPuro;
 
 class DetallePedidos extends Component
@@ -20,11 +21,11 @@ class DetallePedidos extends Component
 
     public $currentUrl;
 
-    public $id_cliente, $descripcion_produccion, $imagen_produccion, $descripcion_empaque,$imagen_anillado;
+    public $id_cliente, $descripcion_produccion, $imagen_produccion, $descripcion_empaque, $imagen_anillado;
     public $imagen_caja;
     public $cantidad_puros;
 
-    public $id_emapaque;
+    public $id_empaque, $sampler, $anillo, $upc, $codigo_caja, $sello;
     public $id_puro;
     public $codigo_puro;
     public $presentacion_puro;
@@ -45,7 +46,7 @@ class DetallePedidos extends Component
     public $filtro_alias_vitola = null;
     public $filtro_capa = null;
     public $filtro_codigo_empaque = null;
-
+    public $filtro_marca = null;
     public $clientes = [];
     public $puros = [];
     public $error_puro;
@@ -60,39 +61,52 @@ class DetallePedidos extends Component
     public $perPage = 10;
     protected $paginationTheme = 'bootstrap';
 
+
     protected $rules = [
-        'codigo_empaque' => 'required|string|max:15|unique:empaque,codigo_empaque',
-        'id_tipoempaque' => 'required|integer|exists:tipo_empaque,id_tipoempaque',
+        'id_empaque' => 'required|string|exists:info_empaque,id_empaque',
         'descripcion_empaque' => 'nullable|string|max:255',
         'imagen_anillado' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'imagen_caja' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        'cantidad_caja' => 'nullable|integer|min:1',
-        'codigo_puro' => 'required|string|exists:info_puro,codigo_puro',
+        'id_puro' => 'nullable|integer|exists:info_puro,id_puro',
         'id_cliente' => 'required|integer|exists:clientes,id_cliente',
         'descripcion_produccion' => 'nullable|string|max:255',
         'imagen_produccion' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ];
 
 
-    public function infoPuro()
+    public function infoEmpaque()
     {
-        if (empty($this->codigo_puro)) {
+        if (empty($this->codigo_empaque)) {
             return;
         }
 
-        $puro = InfoPuro::where('codigo_puro', trim($this->codigo_puro))
-            ->with(['marca', 'aliasVitola', 'vitola', 'capa'])
-            ->first();
+        $connection = DB::connection();
 
-        if ($puro) {
-            $this->presentacion_puro = $puro->presentacion_puro ?? '';
-            $this->marca = $puro->marca->marca ?? '';
-            $this->alias_vitola = $puro->aliasVitola->alias_vitola ?? '';
-            $this->vitola = $puro->vitola->vitola ?? '';
-            $this->capa = $puro->capa->capa ?? '';
+        $result = $connection->select('CALL ObtenerInfoEmpaque(?)', [$this->codigo_empaque]);
+
+        if ($result) {
+
+            $this->id_empaque = $result[0]->id_empaque ?? '';
+            $this->codigo_empaque = $result[0]->codigo_empaque ?? '';
+            $this->codigo_puro = $result[0]->codigo_puro ?? '';
+            $this->presentacion_puro = $result[0]->presentacion_puro ?? '';
+            $this->marca = $result[0]->marca ?? '';
+            $this->alias_vitola = $result[0]->alias_vitola ?? '';
+            $this->vitola = $result[0]->vitola ?? '';
+            $this->capa = $result[0]->capa ?? '';
+            $this->tipo_empaque = $result[0]->tipo_empaque ?? '';
+            $this->sampler = $result[0]->sampler ?? '';
+            $this->descripcion_empaque = $result[0]->descripcion_empaque ?? '';
+            $this->anillo = $result[0]->anillo ?? '';
+            $this->imagen_anillado = $result[0]->imagen_anillado ?? '';
+            $this->sello = $result[0]->sello ?? '';
+            $this->upc = $result[0]->upc ?? '';
+            $this->codigo_caja = $result[0]->codigo_caja ?? '';
+            $this->imagen_caja = $result[0]->imagen_caja ?? '';
+
             $this->error_puro = null;
         } else {
-            $this->error_puro = 'Código de puro no encontrado.';
+            $this->error_puro = 'Código de empaque no encontrado.';
         }
     }
 
@@ -101,21 +115,23 @@ class DetallePedidos extends Component
         $this->resetPage();
     }
 
+    protected $listeners = ['resetFilters' => 'resetFilters'];
+
     public function resetFilters()
     {
-        $this->filtro_cliente = "";
-        $this->filtro_codigo_puro = "";
-        $this->filtro_presentacion = "";
-        $this->filtro_vitola = "";
-        $this->filtro_alias_vitola = "";
-        $this->filtro_capa = "";
-        $this->filtro_codigo_empaque = "";
-
-        $this->resetPage();
+        $this->filtro_cliente = null;
+        $this->filtro_codigo_puro = null;
+        $this->filtro_presentacion = null;
+        $this->filtro_marca = null;
+        $this->filtro_vitola = null;
+        $this->filtro_alias_vitola = null;
+        $this->filtro_capa = null;
+        $this->filtro_codigo_empaque = null;
     }
 
     public function getDatos()
     {
+
         $results = DB::select("CALL GetDetallePedido(?, ?, ?, ?, ?, ?, ?)", [
             $this->filtro_cliente,
             $this->filtro_codigo_puro,
@@ -127,7 +143,6 @@ class DetallePedidos extends Component
         ]);
 
         $collection = collect($results)->map(function ($row) {
-
             return [
                 'id_pedido' => $row->id_pedido ?? '',
                 'cliente' => $row->name_cliente ?? '',
@@ -138,16 +153,20 @@ class DetallePedidos extends Component
                 'vitola' => $row->vitola ?? '',
                 'capa' => $row->capa ?? '',
                 'descripcion_produccion' => $row->descripcion_produccion ?? '',
-                'imagen_produccion' => $row->imagen_produccion,
+                'imagen_produccion' => $row->imagen_produccion ?? '',
                 'codigo_empaque' => $row->codigo_empaque ?? '',
-
+                'tipo_empaque' => $row->tipo_empaque ?? '',
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',
-                'imagen_anillado' => $row->imagen_anillado,
-                'imagen_caja' => $row->imagen_caja,
+                'sampler' => $row->sampler ?? '',
+                'imagen_anillado' => $row->imagen_anillado ?? '',
+                'codigo_caja' => $row->codigo_caja ?? '',
+                'imagen_caja' => $row->imagen_caja ?? '',
+                'anillo' => $row->anillo ?? '',
+                'sello' => $row->sello ?? '',
+                'upc' => $row->upc ?? '',
                 'estado_pedido' => $row->estado_pedido ?? '',
             ];
         });
-
 
         $maxRecords = $collection->count();
         $currentPage = $this->getPage();
@@ -162,7 +181,15 @@ class DetallePedidos extends Component
         );
     }
 
-    public function crearDetallePedidoYEmpaque()
+    public function removeImage($field, $index)
+    {
+        if (isset($this->$field[$index])) {
+            unset($this->$field[$index]);
+            $this->$field = array_values($this->$field);
+        }
+    }
+
+    public function crearDetallePedido()
     {
         $this->validate();
 
@@ -175,6 +202,7 @@ class DetallePedidos extends Component
             $id_pedido = $ultimoPedido ? $ultimoPedido->id_pedido + 1 : 1;
 
             $codigo_puro = $this->codigo_puro;
+            $codigo_caja = $this->codigo_caja;
 
             $numeroIncremental = 1;
             $fechaActual = date('Y-m-d');
@@ -206,7 +234,7 @@ class DetallePedidos extends Component
             if ($this->imagen_caja) {
                 $extension = $this->imagen_caja->getClientOriginalExtension();
                 $numeroIncremental++;
-                $nombreArchivo = "{$id_pedido}-{$codigo_puro}-{$numeroIncremental}-{$fechaActual}.{$extension}";
+                $nombreArchivo = "{$id_pedido}-{$codigo_caja}-{$numeroIncremental}-{$fechaActual}.{$extension}";
 
                 $imagenCajaPath = $this->imagen_caja->storeAs(
                     'imagenes/caja',
@@ -226,33 +254,41 @@ class DetallePedidos extends Component
 
             $id_puro = $puroDB->id_puro;
 
-            DB::statement('CALL InsertarDetallePedidoYEmpaque(?,?,?,?,?,?,?,?,?,?)', [
-                $this->id_cliente,
-                $id_puro,
-                $this->descripcion_produccion,
-                $imagenProduccionPath,
-                $this->codigo_empaque,
-                $this->tipo_empaque,
-                $this->descripcion_empaque,
-                $imagenAnilladoPath,
-                $imagenCajaPath,
-                $this->cantidad_caja,
+            $empaqueDB = DB::table('info_empaque')
+                ->where('codigo_empaque', $this->codigo_empaque)
+                ->first();
+
+            if (!$empaqueDB) {
+                session()->flash('error', 'Código de empaque no encontrado.');
+                return;
+            }
+
+            $id_empaque = $empaqueDB->id_empaque;
+            $descripcion_empaque = isset($empaqueDB->descripcion) ? $empaqueDB->descripcion : null;
+
+            $id_detalle_pedido = DB::table('detalle_pedido')->insertGetId([
+                'id_cliente' => $this->id_cliente,
+                'id_puro' => $id_puro,
+                'id_empaque' => $id_empaque,
+                'descripcion_produccion' => $this->descripcion_produccion,
+                'imagen_produccion' => $imagenProduccionPath,
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
+
+            if ($imagenAnilladoPath || $imagenCajaPath) {
+                DB::table('info_empaque')->where('id_empaque', $id_empaque)->update([
+                    'descripcion_empaque' => $descripcion_empaque,
+                    'imagen_anillado' => $imagenAnilladoPath,
+                    'imagen_caja' => $imagenCajaPath,
+                    'updated_at' => now()
+                ]);
+            }
+
 
             session()->flash('message', 'Pedido insertado correctamente.');
 
-            $this->reset([
-                'id_cliente',
-                'codigo_puro',
-                'descripcion_produccion',
-                'imagen_produccion',
-                'codigo_empaque',
-                'tipo_empaque',
-                'descripcion_empaque',
-                'imagen_anillado',
-                'imagen_caja',
-                'cantidad_caja'
-            ]);
+            $this->dispatch('dispatch');
         } catch (\Exception $e) {
 
             if ($imagenProduccionPath && Storage::disk('public')->exists($imagenProduccionPath)) {
@@ -271,6 +307,12 @@ class DetallePedidos extends Component
             ]);
             session()->flash('error', 'Error al insertar el pedido: ' . $e->getMessage());
         }
+    }
+
+    public function closeEmpaqueModal()
+    {
+        $this->dispatch('hide-edit-modal');
+        $this->reset(['id_cliente', 'codigo_puro']);
     }
 
     public function eliminarDetallePedido($id_pedido)
@@ -299,154 +341,6 @@ class DetallePedidos extends Component
         } else {
             session()->flash('error', 'Registro no encontrado.');
         }
-    }
-
-    public function editarPedido($id_pedido)
-    {
-        $pedido = DB::table('detalle_pedido')
-            ->join('empaque', 'detalle_pedido.id_empaque', '=', 'empaque.id_empaque')
-            ->join('info_puro', 'detalle_pedido.id_puro', '=', 'info_puro.id_puro')
-            ->where('detalle_pedido.id_pedido', $id_pedido)
-            ->first();
-
-        if (!$pedido) {
-            session()->flash('error', 'Pedido no encontrado.');
-            return;
-        }
-
-        $this->id_pedido = $pedido->id_pedido;
-        $this->id_cliente = $pedido->id_cliente;
-        $this->codigo_puro = $pedido->codigo_puro;
-        $this->descripcion_produccion = $pedido->descripcion_produccion;
-        $this->codigo_empaque = $pedido->codigo_empaque;
-        $this->tipo_empaque = $pedido->id_tipoempaque;
-        $this->descripcion_empaque = $pedido->descripcion_empaque;
-        $this->cantidad_caja = $pedido->cantidad_caja;
-
-        $this->imagenProduccionActual = $pedido->imagen_produccion;
-        $this->imagenAnilladoActual = $pedido->imagen_anillado;
-        $this->imagenCajaActual = $pedido->imagen_caja;
-
-        $this->editing = true;
-    }
-
-    public function actualizarPedido()
-    {
-        $this->validate();
-
-        try {
-            $imagenProduccionPath = $this->imagenProduccionActual;
-            $imagenAnilladoPath = $this->imagenAnilladoActual;
-            $imagenCajaPath = $this->imagenCajaActual;
-
-            if ($this->imagen_produccion) {
-                if ($imagenProduccionPath && Storage::disk('public')->exists($imagenProduccionPath)) {
-                    Storage::disk('public')->delete($imagenProduccionPath);
-                }
-
-                $numeroIncremental = 1;
-                $fechaActual = date('Y-m-d');
-                $nombreBase = "{$this->id_pedido}-{$this->codigo_puro}-{$numeroIncremental}-{$fechaActual}";
-                $extension = $this->imagen_produccion->getClientOriginalExtension();
-                $nombreArchivo = "{$nombreBase}.{$extension}";
-
-                $imagenProduccionPath = $this->imagen_produccion->storeAs(
-                    'imagenes/produccion',
-                    $nombreArchivo,
-                    'public'
-                );
-            }
-
-            if ($this->imagen_anillado) {
-                if ($imagenAnilladoPath && Storage::disk('public')->exists($imagenAnilladoPath)) {
-                    Storage::disk('public')->delete($imagenAnilladoPath);
-                }
-
-                $numeroIncremental = 2;
-                $fechaActual = date('Y-m-d');
-                $nombreArchivo = "{$this->id_pedido}-{$this->codigo_puro}-{$numeroIncremental}-{$fechaActual}.{$this->imagen_anillado->getClientOriginalExtension()}";
-
-                $imagenAnilladoPath = $this->imagen_anillado->storeAs(
-                    'imagenes/anillado',
-                    $nombreArchivo,
-                    'public'
-                );
-            }
-
-            if ($this->imagen_caja) {
-                if ($imagenCajaPath && Storage::disk('public')->exists($imagenCajaPath)) {
-                    Storage::disk('public')->delete($imagenCajaPath);
-                }
-
-                $numeroIncremental = 3;
-                $fechaActual = date('Y-m-d');
-                $nombreArchivo = "{$this->id_pedido}-{$this->codigo_puro}-{$numeroIncremental}-{$fechaActual}.{$this->imagen_caja->getClientOriginalExtension()}";
-
-                $imagenCajaPath = $this->imagen_caja->storeAs(
-                    'imagenes/caja',
-                    $nombreArchivo,
-                    'public'
-                );
-            }
-
-            DB::table('detalle_pedido')
-                ->where('id_pedido', $this->id_pedido)
-                ->update([
-                    'id_cliente' => $this->id_cliente,
-                    'descripcion_produccion' => $this->descripcion_produccion,
-                    'imagen_produccion' => $imagenProduccionPath,
-                    'updated_at' => now()
-                ]);
-
-            $empaque = DB::table('detalle_pedido')
-                ->where('id_pedido', $this->id_pedido)
-                ->first();
-
-            if ($empaque && $empaque->id_empaque) {
-                DB::table('info_empaque')
-                    ->where('id_empaque', $empaque->id_empaque)
-                    ->update([
-                        'codigo_empaque' => $this->codigo_empaque,
-                        'id_tipo' => $this->tipo_empaque,
-                        'descripcion_empaque' => $this->descripcion_empaque,
-                        'imagen_anillado' => $imagenAnilladoPath,
-                        'imagen_caja' => $imagenCajaPath,
-                        'cantidad_caja' => $this->cantidad_caja,
-                        'updated_at' => now()
-                    ]);
-            }
-
-            session()->flash('message', 'Pedido actualizado correctamente.');
-            $this->cancelarEdicion();
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar detalle de pedido y empaque', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            session()->flash('error', 'Error al actualizar el pedido: ' . $e->getMessage());
-        }
-    }
-
-    public function cancelarEdicion()
-    {
-        $this->reset([
-            'id_pedido',
-            'id_cliente',
-            'codigo_puro',
-            'descripcion_produccion',
-            'imagen_produccion',
-            'codigo_empaque',
-            'tipo_empaque',
-            'descripcion_empaque',
-            'imagen_anillado',
-            'imagen_caja',
-            'cantidad_caja',
-            'imagenProduccionActual',
-            'imagenAnilladoActual',
-            'imagenCajaActual'
-        ]);
-
-        $this->editing = false;
     }
 
     public function render()

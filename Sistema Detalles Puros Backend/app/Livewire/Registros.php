@@ -38,6 +38,11 @@ class Registros extends Component
         $this->resetPage();
     }
 
+    public function getAuthUserId()
+    {
+        return Auth::user()->id_usuario;
+    }
+
     // Toda la funcionalidad de la tabla de Clientes
     public function getDatosClientes()
     {
@@ -226,14 +231,12 @@ class Registros extends Component
 
     public function crearMarca()
     {
-        $id_usuario = Auth::user()->id_usuario;
-
         if ($this->id_marca) {
             Marca::where('id_marca', $this->id_marca)->update(['marca' => $this->marca]);
             Bitacora::create([
-                'descripcion'=> 'Se realizo actualizacion de un registro: ' . $this->marca,
+                'descripcion' => 'Se realizo actualizacion de un registro: ' . $this->marca,
                 'accion' => 'Actualización',
-                'id_usuario' => $id_usuario,
+                'id_usuario' => $this->getAuthUserId(),
             ]);
         } else {
             $ultimoId = Marca::max('id_marca');
@@ -246,9 +249,9 @@ class Registros extends Component
             ]);
 
             Bitacora::create([
-                'descripcion'=> 'Se realizo un nuevo registro: ' . $this->marca,
+                'descripcion' => 'Se realizo un nuevo registro: ' . $this->marca,
                 'accion' => 'Crear',
-                'id_usuario' => $id_usuario,
+                'id_usuario' => $this->getAuthUserId(),
             ]);
         }
 
