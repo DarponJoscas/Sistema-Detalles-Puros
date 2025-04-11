@@ -12,18 +12,20 @@ use App\Livewire\InfoEmpaques;
 use App\Livewire\Bitacoras;
 use App\Livewire\Empaque;
 use App\Livewire\Produccion;
+use App\Livewire\HistorialImagenes;
 
 Route::get('/', Usuarios::class)->name('login');
 Route::post('/logout', [Usuarios::class, 'logout'])->name('logout');
 
-
-Route::get('/infoempaque', InfoEmpaques::class)->name('infoempaque');
-Route::get('/dashboard', Dashboards::class)->name('dashboard');
-Route::get('/produccion', Produccion::class)->name('produccion');
-Route::get('/empaque', Empaque::class)->name('empaque');
-Route::get('/administracion', DetallePedidos::class)->name('administracion');
-
-Route::get('/bitacora', Bitacoras::class)->name('bitacora');
-Route::get('/registros', Registros::class)->name('registros');
-Route::get('/usuarios', RegistroUsuarios::class)->name('usuarios');
-Route::get('/puros', InfoPuros::class)->name('puros');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/infoempaque', InfoEmpaques::class)->name('infoempaque');
+    Route::get('/dashboard', Dashboards::class)->name('dashboard');
+    Route::get('/produccion', Produccion::class)->name('produccion');
+    Route::get('/empaque', Empaque::class)->name('empaque');
+    Route::get('/administracion', DetallePedidos::class)->name('administracion');
+    Route::get('/historialimagenes', HistorialImagenes::class)->name('historialimagenes');
+    Route::get('/bitacora', Bitacoras::class)->name('bitacora');
+    Route::get('/registros', Registros::class)->name('registros');
+    Route::get('/usuarios', RegistroUsuarios::class)->name('usuarios');
+    Route::get('/puros', InfoPuros::class)->name('puros');
+});

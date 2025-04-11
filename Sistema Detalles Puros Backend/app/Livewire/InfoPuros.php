@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Validator;
 
 class InfoPuros extends Component
 {
@@ -35,7 +36,7 @@ class InfoPuros extends Component
     public $showModal = false;
 
     public $filtro_codigo_puro = null;
-    public $filtro_presentacion = null;
+    public $filtro_presentacion = [];
     public $filtro_vitola = null;
     public $filtro_alias_vitola = null;
     public $filtro_capa = null;
@@ -47,26 +48,9 @@ class InfoPuros extends Component
     public $importedCount = 0;
     public $errors = [];
 
-    protected function rules()
-    {
-        $uniqueRule = 'required|string|max:255|unique:info_puro,codigo_puro';
 
-        if ($this->editing && $this->originalCodigo === $this->codigo_puro) {
-            $uniqueRule = 'required|string|max:255';
-        }
-
-        return [
-            'presentacion_puro' => 'required|string|max:255',
-            'marca' => 'required|string|max:255',
-            'alias_vitola' => 'required|string|max:255',
-            'vitola' => 'required|string|max:255',
-            'capa' => 'required|string|max:255',
-            'codigo_puro' => $uniqueRule,
-        ];
-    }
-
-    protected $messages = [
-        'codigo_puro.unique' => 'Este código de puro ya existe en la base de datos.',
+    protected $listeners = [
+        'confirmarEliminacionPuro' => 'confirmarEliminacionPuro',
     ];
 
     public function mount()
@@ -183,7 +167,70 @@ class InfoPuros extends Component
 
     public function createPuro()
     {
-        $this->validate();
+
+        $validator = Validator::make(
+            [
+                'presentacion_puro' => $this->presentacion_puro,
+                'marca' => $this->marca,
+                'alias_vitola' => $this->alias_vitola,
+                'vitola' => $this->vitola,
+                'capa' => $this->capa,
+                'codigo_puro' => $this->codigo_puro,
+            ],
+            [
+                'presentacion_puro' => 'required|string|max:255',
+                'marca' => 'required|string|max:255',
+                'alias_vitola' => 'required|string|max:255',
+                'vitola' => 'required|string|max:255',
+                'capa' => 'required|string|max:255',
+                'codigo_puro' => 'required|string|max:255|unique:info_puro,codigo_puro',
+            ],
+            [
+                'presentacion_puro.required' => 'La presentación del puro es obligatoria.',
+                'presentacion_puro.string' => 'La presentación del puro debe ser una cadena de texto.',
+                'presentacion_puro.max' => 'La presentación del puro no puede tener más de 255 caracteres.',
+
+                'marca.required' => 'La marca es obligatoria.',
+                'marca.string' => 'La marca debe ser una cadena de texto.',
+                'marca.max' => 'La marca no puede tener más de 255 caracteres.',
+
+                'alias_vitola.required' => 'El alias de la vitola es obligatorio.',
+                'alias_vitola.string' => 'El alias de la vitola debe ser una cadena de texto.',
+                'alias_vitola.max' => 'El alias de la vitola no puede tener más de 255 caracteres.',
+
+                'vitola.required' => 'La vitola es obligatoria.',
+                'vitola.string' => 'La vitola debe ser una cadena de texto.',
+                'vitola.max' => 'La vitola no puede tener más de 255 caracteres.',
+
+                'capa.required' => 'La capa es obligatoria.',
+                'capa.string' => 'La capa debe ser una cadena de texto.',
+                'capa.max' => 'La capa no puede tener más de 255 caracteres.',
+
+                'codigo_puro.required' => 'El código del puro es obligatorio.',
+                'codigo_puro.string' => 'El código del puro debe ser una cadena de texto.',
+                'codigo_puro.max' => 'El código del puro no puede tener más de 255 caracteres.',
+                'codigo_puro.unique' => 'El código del puro ya está registrado. Por favor, elija otro.',
+            ]
+        );
+
+        if ($this->editing && $this->originalCodigo === $this->codigo_puro) {
+            $validator->sometimes('codigo_puro', 'required|string|max:255', function () {
+                return $this->editing && $this->originalCodigo === $this->codigo_puro;
+            });
+        }
+
+        $validator->setAttributeNames([
+            'codigo_puro' => 'Código de Puro'
+        ]);
+
+        if ($validator->fails()) {
+            $this->dispatch('swal', json_encode([
+                'title' => 'Error',
+                'text' => $validator->errors()->first(),
+                'icon' => 'error',
+            ]));
+            return;
+        }
 
         $this->getOrCreateRelatedIds();
 
@@ -202,9 +249,18 @@ class InfoPuros extends Component
                     $puro->updated_at = now();
                     $puro->save();
 
-                    session()->flash('success', 'Puro actualizado correctamente.');
+                    $this->dispatch('swal', json_encode([
+                        'title' => 'Éxito',
+                        'text' => 'Puro actualizado correctamente.',
+                        'icon' => 'success',
+                    ]));
                 } else {
-                    session()->flash('error', 'No se encontró el puro para actualizar.');
+
+                    $this->dispatch('swal', json_encode([
+                        'title' => 'Error',
+                        'text' => 'No se encontró el puro para actualizar.',
+                        'icon' => 'error',
+                    ]));
                 }
             } else {
                 DB::statement('CALL InsertPuro(?,?,?,?,?,?,?)', [
@@ -217,7 +273,11 @@ class InfoPuros extends Component
                     $this->estado_puro,
                 ]);
 
-                session()->flash('success', 'Puro registrado correctamente.');
+                $this->dispatch('swal', json_encode([
+                    'title' => 'Éxito',
+                    'text' => 'Puro registrado correctamente.',
+                    'icon' => 'success',
+                ]));
             }
 
             DB::commit();
@@ -226,39 +286,48 @@ class InfoPuros extends Component
             $this->closeModal();
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Error al procesar la operación. Por favor, inténtelo de nuevo.');
-            Log::error('Error en createPuro: ' . $e->getMessage());
+
+            $this->dispatch('swal', json_encode([
+                'title' => 'Error',
+                'text' => 'Error al procesar la operación. Por favor, inténtelo de nuevo.',
+                'icon' => 'error',
+            ]));
         }
     }
 
+
     public function editPuro($codigoPuro)
     {
-
         $this->originalCodigo = $codigoPuro;
 
-        $puro = InfoPuro::where('codigo_puro', $codigoPuro)->first();
+        $result = DB::select('CALL editPuro(?)', [$codigoPuro]);
 
-        if ($puro) {
-            $this->codigo_puro = $codigoPuro;
+        if (count($result) > 0) {
+            $puro = $result[0];
+
+            $this->codigo_puro = $puro->codigo_puro;
             $this->presentacion_puro = $puro->presentacion_puro;
             $this->id_marca = $puro->id_marca;
             $this->id_vitola = $puro->id_vitola;
             $this->id_aliasvitola = $puro->id_aliasvitola;
             $this->id_capa = $puro->id_capa;
 
-            $marca = DB::table('marca')->where('id_marca', $puro->id_marca)->first();
-            $vitola = DB::table('vitola')->where('id_vitola', $puro->id_vitola)->first();
-            $aliasVitola = DB::table('alias_vitola')->where('id_aliasvitola', $puro->id_aliasvitola)->first();
-            $capa = DB::table('capa')->where('id_capa', $puro->id_capa)->first();
-
-            $this->marca = $marca ? $marca->marca : '';
-            $this->vitola = $vitola ? $vitola->vitola : '';
-            $this->alias_vitola = $aliasVitola ? $aliasVitola->alias_vitola : '';
-            $this->capa = $capa ? $capa->capa : '';
+            $this->marca = $puro->marca ?? '';
+            $this->vitola = $puro->vitola ?? '';
+            $this->alias_vitola = $puro->alias_vitola ?? '';
+            $this->capa = $puro->capa ?? '';
 
             $this->openModal();
+        } else {
+
+            $this->dispatch('swal', json_encode([
+                'title' => 'Error',
+                'text' => 'El código de puro no existe.',
+                'icon' => 'error',
+            ]));
         }
     }
+
 
     public function filtrarPedidos()
     {
@@ -267,9 +336,11 @@ class InfoPuros extends Component
 
     public function getDatosPuros()
     {
+        $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
+
         $results = DB::select("CALL GetPuros(?, ?, ?, ?, ?, ?)", [
             $this->filtro_codigo_puro,
-            $this->filtro_presentacion,
+            $presentacionesString,
             $this->filtro_marca,
             $this->filtro_vitola,
             $this->filtro_alias_vitola,
@@ -309,45 +380,109 @@ class InfoPuros extends Component
         );
     }
 
-    public function eliminarPuros($codigoPuro)
+    public function eliminarPuros($idPuro)
+    {
+        $validator = Validator::make(
+            ['id_puro' => $idPuro],
+            ['id_puro' => 'required|integer|exists:info_puro,id_puro']
+        );
+
+        if ($validator->fails()) {
+            $this->dispatch('swal', json_encode([
+                'title' => 'ID no válido',
+                'text' => 'No se encontró el puro especificado.',
+                'icon' => 'error',
+            ]));
+            return;
+        }
+
+        $this->dispatch('swalConfirmDelete', json_encode([
+            'title' => '¿Estás seguro?',
+            'text' => '¿Realmente deseas desactivar este puro?',
+            'icon' => 'warning',
+            'showCancelButton' => true,
+            'confirmButtonColor' => '#3085d6',
+            'cancelButtonColor' => '#d33',
+            'confirmButtonText' => 'Sí, desactivar',
+            'cancelButtonText' => 'No, cancelar',
+            'idPuro' => $idPuro
+        ]));
+    }
+
+
+    public function confirmarEliminacionPuro($idPuro)
     {
         try {
-            $registro = InfoPuro::where('codigo_puro', $codigoPuro)->first();
-            if ($registro) {
-                $registro->estado_puro = 0;
-                $registro->save();
-                session()->flash('success', 'Se ha desactivado correctamente el puro.');
+            $eliminar = InfoPuro::find($idPuro);
+
+            if ($eliminar) {
+
+                $eliminar->estado_puro = 0;
+                $eliminar->save();
+
+                $this->dispatch('refresh');
+
+                $this->dispatch('swal', json_encode([
+                    'title' => 'Éxito',
+                    'text' => 'Se ha desactivado correctamente el puro.',
+                    'icon' => 'success',
+                ]));
             } else {
-                session()->flash('error', 'No se encontró el registro para desactivar.');
+                $this->dispatch('swal', json_encode([
+                    'title' => 'Error',
+                    'text' => 'No se encontró el registro para desactivar.',
+                    'icon' => 'error',
+                ]));
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al desactivar el puro.');
-            Log::error('Error en eliminarPuros: ' . $e->getMessage());
+            $this->dispatch('swal', json_encode([
+                'title' => 'Error',
+                'text' => 'Ocurrió un error al desactivar el puro.',
+                'icon' => 'error',
+            ]));
         }
     }
+
 
     public function reactivarPuro($codigoPuro)
     {
         try {
+
             $reactivar = InfoPuro::where('codigo_puro', $codigoPuro)->update(['estado_puro' => 1]);
 
             if ($reactivar) {
+
                 $this->dispatch('refresh');
-                session()->flash('success', 'Se ha activado correctamente el puro.');
+
+                $this->dispatch('swal', json_encode([
+                    'title' => 'Éxito',
+                    'text' => 'Se ha activado correctamente el puro.',
+                    'icon' => 'success',
+                ]));
             } else {
-                session()->flash('error', 'No se encontró el registro para activar.');
+
+                $this->dispatch('swal', json_encode([
+                    'title' => 'Error',
+                    'text' => 'No se encontró el registro para activar.',
+                    'icon' => 'error',
+                ]));
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al activar el puro.');
-            Log::error('Error en reactivarPuro: ' . $e->getMessage());
+
+            $this->dispatch('swal', json_encode([
+                'title' => 'Error',
+                'text' => 'Error al activar el puro.',
+                'icon' => 'error',
+            ]));
         }
     }
+
 
     public function importProducts()
     {
         try {
             set_time_limit(300);
-            $apiUrl = env('APP_URL') . '/public/api/materia_prima/productos';
+            $apiUrl = env('APP_URL') . 'public/api/materia_prima/productos';
             $response = Http::timeout(30)->get($apiUrl);
 
             if (!$response->successful()) {
@@ -387,7 +522,7 @@ class InfoPuros extends Component
                     [
                         'id_marca' => $product['id_marca'],
                         'marca' => $product['marca'],
-                        'estado_marca'=> 1,
+                        'estado_marca' => 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -398,7 +533,7 @@ class InfoPuros extends Component
                     [
                         'id_vitola' => $product['id_vitola'],
                         'vitola' => $product['vitola'],
-                        'estado_vitola'=> 1,
+                        'estado_vitola' => 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -409,7 +544,7 @@ class InfoPuros extends Component
                     [
                         'id_aliasvitola' => $product['id_nombre'],
                         'alias_vitola' => $product['nombre'],
-                        'estado_aliasVitola'=> 1,
+                        'estado_aliasVitola' => 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -420,7 +555,7 @@ class InfoPuros extends Component
                     [
                         'id_capa' => $product['id_capa'],
                         'capa' => $product['capa'],
-                        'estado_capa'=> 1,
+                        'estado_capa' => 1,
                         'updated_at' => now(),
                         'created_at' => now()
                     ]
@@ -443,13 +578,23 @@ class InfoPuros extends Component
             }
 
             DB::commit();
-            session()->flash('success', 'Datos importados exitosamente.');
+
+            $this->dispatch('swal', json_encode([
+                'title' => 'Éxito',
+                'text' => 'Datos importados exitosamente.',
+                'icon' => 'success',
+            ]));
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error en importProducts: ' . $e->getMessage());
-            session()->flash('error', 'Error: ' . $e->getMessage());
+
+            $this->dispatch('swal', json_encode([
+                'title' => 'Error',
+                'text' => 'Error: ' . $e->getMessage(),
+                'icon' => 'error',
+            ]));
         }
     }
+
 
     public function render()
     {

@@ -26,15 +26,26 @@
                         </select>
                     </div>
 
-                    <div wire:ignore class="col px-1" style="width: 190px; flex: none;">
-                        <select id="presentacionPuro" wire:model="filtro_presentacion" wire:change="filtrarPedidos">
-                            <option value="">Buscar presentación puro</option>
-                            @foreach ($presentaciones as $presentacion)
-                                <option value="{{ $presentacion->presentacion_puro }}">
-                                    {{ $presentacion->presentacion_puro }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div  class="col px-1" style="width: 240px; flex: none;" wire:ignore>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion" data-bs-toggle="dropdown" aria-expanded="false">
+                                Buscar Presentación Puro
+                            </button>
+                            <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion" style="max-height: 300px; overflow-y: auto;">
+                                @foreach ($presentaciones as $presentacion)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               value="{{ $presentacion->presentacion_puro }}"
+                                               id="presentacion-{{ $loop->index }}"
+                                               wire:model="filtro_presentacion"
+                                               wire:change="filtrarPedidos">
+                                        <label class="form-check-label" for="presentacion-{{ $loop->index }}">
+                                            {{ $presentacion->presentacion_puro }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
 
                     <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
@@ -152,15 +163,13 @@
                                         </div>
                                         <div class="d-inline-block mb-1">
                                             <button type="button" class="btn btn-danger"
-                                                wire:click="eliminarPuros('{{ $dato['codigo_puro'] }}')"
-                                                onclick="return confirm('¿Está seguro de desactivar este puro?')">
+                                                wire:click="eliminarPuros('{{ $dato['id_puro'] }}')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     @else
                                         <button type="button" class="btn btn-success"
-                                            wire:click="reactivarPuro('{{ $dato['codigo_puro'] }}')"
-                                            onclick="return confirm('¿Está seguro de reactivar este puro?')">
+                                            wire:click="reactivarPuro('{{ $dato['codigo_puro'] }}')">
                                             <i class="bi bi-arrow-clockwise"></i> Reactivar
                                         </button>
                                     @endif
@@ -205,7 +214,7 @@
 
                         <div class="form-group mb-3">
                             <label for="register-marca_puro">Marca:</label>
-                            <input type="text" wire:model.defer="marca_puro" id="register-marca_puro"
+                            <input type="text" wire:model.defer="marca" id="register-marca_puro"
                                 class="form-control" placeholder="Ingrese la marca" list="marca_puro-list">
                         </div>
 
@@ -233,7 +242,7 @@
 
                     <div div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" wire:click="updatePuro" class="btn btn-primary">
+                        <button type="button" wire:click="createPuro" class="btn btn-primary">
                             Actualizar
                         </button>
                     </div>

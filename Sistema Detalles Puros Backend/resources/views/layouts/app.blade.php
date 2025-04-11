@@ -196,6 +196,15 @@
                         </li>
                     @endif
 
+                    @if (!in_array(request()->path(), ['historialimagenes']))
+                        <li class="nav-item">
+                            <form action="{{ route('historialimagenes') }}" method="GET">
+                                <button type="submit" class="nav-link btn btn-link"
+                                    style="color: white; text-decoration: none;">Historial de Imagenes</button>
+                            </form>
+                        </li>
+                    @endif
+
                     @if (!in_array(request()->path(), ['bitacora']))
                         <li class="nav-item">
                             <form action="{{ route('bitacora') }}" method="GET">
@@ -296,6 +305,102 @@
                 document.body.appendChild(logoutForm);
 
                 logoutForm.submit();
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Livewire.on('swal', (data) => {
+                const options = JSON.parse(data);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: options.timer || 3000,
+                    timerProgressBar: true,
+                    icon: options.icon || 'success',
+                    title: options.title || '¡Hecho!',
+                    text: options.text || '',
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('livewire:init', function() {
+            Livewire.on('swalConfirmDelete', (data) => {
+                const options = JSON.parse(data);
+
+                const keys = Object.keys(options);
+                const idKey = keys.find(k => k.startsWith('id'));
+                const idValue = options[idKey];
+
+                delete options[idKey];
+
+                Swal.fire(options).then((result) => {
+                    if (result.isConfirmed) {
+                        if (idKey === 'idPedido') {
+                            Livewire.dispatch('confirmarEliminacionPedido', {
+                                id_pedido: idValue
+                            });
+                        }
+
+                        if (idKey === 'idPuro') {
+                            Livewire.dispatch('confirmarEliminacionPuro', {
+                                idPuro: idValue
+                            });
+                        }
+
+                        if (idKey === 'idCliente') {
+                            Livewire.dispatch('confirmarEliminacionCliente', {
+                                clienteId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idRol') {
+                            Livewire.dispatch('confirmarEliminacionRol', {
+                                rolId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idMarca') {
+                            Livewire.dispatch('confirmarEliminacionMarca', {
+                                marcaId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idCapa') {
+                            Livewire.dispatch('confirmarEliminacionCapa', {
+                                capaId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idVitola') {
+                            Livewire.dispatch('confirmarEliminacionVitola', {
+                                vitolaId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idAliasVitola') {
+                            Livewire.dispatch('confirmarEliminacionAliasVitola', {
+                                aliasVitolaId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idTipoEmpaque') {
+                            Livewire.dispatch('confirmarEliminacionTipoEmpaque', {
+                                tipoEmpaqueId: idValue
+                            });
+                        }
+
+                        if (idKey === 'idUsuario') {
+                            Livewire.dispatch('confirmarEliminacionUsuario', {
+                                id_usuario: idValue
+                            });
+                        }
+                    }
+                });
             });
         });
     </script>

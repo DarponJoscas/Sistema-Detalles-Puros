@@ -35,7 +35,6 @@ class DetallePedido extends Model
         'id_cliente',
         'id_empaque',
         'descripcion_produccion',
-        'imagen_produccion',
         'estado_pedido',
         'created_at',
         'updated_at',
@@ -55,6 +54,6 @@ class DetallePedido extends Model
 
     public function empaque()
     {
-        return $this->belongsTo(Empaque::class, 'id_empaque');
+        return $this->belongsTo(InfoEmpaque::class, 'id_empaque');
     }
 }

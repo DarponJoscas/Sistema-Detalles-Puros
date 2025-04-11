@@ -50,8 +50,7 @@
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarCliente('{{ $dato['id_cliente'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar este puro?')">
+                                                            wire:click="reactivarCliente('{{ $dato['id_cliente'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -105,14 +104,12 @@
                                                             <i class="bi bi-pencil-square text-white"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-danger btn-sm m-1"
-                                                            wire:click="deleteRol({{ $dato['id_rol'] }})"
-                                                            onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                                            wire:click="deleteRol({{ $dato['id_rol'] }})">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarRol('{{ $dato['id_rol'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar este puro?')">
+                                                            wire:click="reactivarRol('{{ $dato['id_rol'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -171,8 +168,7 @@
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarMarca('{{ $dato['id_marca'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar este clinete?')">
+                                                            wire:click="reactivarMarca('{{ $dato['id_marca'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -227,14 +223,12 @@
                                                             <i class="bi bi-pencil-square text-white"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-danger btn-sm m-1"
-                                                            wire:click="deleteCapa({{ $dato['id_capa'] }})"
-                                                            onclick="return confirm('¿Está seguro de eliminar esta capa?')">
+                                                            wire:click="deleteCapa({{ $dato['id_capa'] }})">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarCapa('{{ $dato['id_capa'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar esta capa?')">
+                                                            wire:click="reactivarCapa('{{ $dato['id_capa'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -288,14 +282,12 @@
                                                             <i class="bi bi-pencil-square text-white"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-danger btn-sm m-1"
-                                                            wire:click="deleteVitola({{ $dato['id_vitola'] }})"
-                                                            onclick="return confirm('¿Está seguro de eliminar esta vitola?')">
+                                                            wire:click="deleteVitola({{ $dato['id_vitola'] }})">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarVitola('{{ $dato['id_vitola'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar este vitola?')">
+                                                            wire:click="reactivarVitola('{{ $dato['id_vitola'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -351,14 +343,12 @@
                                                             <i class="bi bi-pencil-square text-white"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-danger btn-sm m-1"
-                                                            wire:click="deleteAliasVitola({{ $dato['id_aliasvitola'] }})"
-                                                            onclick="return confirm('¿Está seguro de eliminar este alias de vitola?')">
+                                                            wire:click="deleteAliasVitola({{ $dato['id_aliasvitola'] }})">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarAliasVitola('{{ $dato['id_aliasvitola'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar este alias vitola?')">
+                                                            wire:click="reactivarAliasVitola('{{ $dato['id_aliasvitola'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -412,14 +402,12 @@
                                                             <i class="bi bi-pencil-square text-white"></i>
                                                         </button>
                                                         <button type="button" class="btn btn-danger btn-sm m-1"
-                                                            wire:click="deleteTipoEmpaque({{ $dato['id_tipoempaque'] }})"
-                                                            onclick="return confirm('¿Está seguro de eliminar este tipo de empaque?')">
+                                                            wire:click="deleteTipoEmpaque({{ $dato['id_tipoempaque'] }})">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     @else
                                                         <button type="button" class="btn btn-success"
-                                                            wire:click="reactivarTipoEmpaque('{{ $dato['id_tipoempaque'] }}')"
-                                                            onclick="return confirm('¿Está seguro de reactivar este tipo empaque?')">
+                                                            wire:click="reactivarTipoEmpaque('{{ $dato['id_tipoempaque'] }}')">
                                                             <i class="bi bi-arrow-clockwise"></i>
                                                         </button>
                                                     @endif
@@ -437,7 +425,8 @@
     </div>
 
     <!-- Modal para crear/editar un cliente -->
-    <div class="modal fade" id="createClienteModal" tabindex="-1" aria-labelledby="createClienteModalLabel">
+    <div class="modal fade" id="createClienteModal" tabindex="-1" aria-labelledby="createClienteModalLabel"
+        wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -475,7 +464,7 @@
     </div>
 
     <!-- Modal para crear rol -->
-    <div class="modal fade" id="createRolModal" tabindex="-1" aria-labelledby="createRolModalLabel">
+    <div class="modal fade" id="createRolModal" tabindex="-1" aria-labelledby="createRolModalLabel" wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -551,7 +540,7 @@
     </div>
 
     <!-- Modal para crear capa -->
-    <div class="modal fade" id="createCapaModal" tabindex="-1" aria-labelledby="createCapaLabel">
+    <div class="modal fade" id="createCapaModal" tabindex="-1" aria-labelledby="createCapaLabel" wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -589,7 +578,8 @@
     </div>
 
     <!-- Modal para crear vitola -->
-    <div class="modal fade" id="createVitolaModal" tabindex="-1" aria-labelledby="createVitolaModalLabel">
+    <div class="modal fade" id="createVitolaModal" tabindex="-1" aria-labelledby="createVitolaModalLabel"
+        wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -627,8 +617,8 @@
     </div>
 
     <!-- Modal para crear alias vitola -->
-    <div class="modal fade" id="createAliasVitolaModal" tabindex="-1"
-        aria-labelledby="createAliasVitolaModalLabel">
+    <div class="modal fade" id="createAliasVitolaModal" tabindex="-1" aria-labelledby="createAliasVitolaModalLabel"
+        wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -666,8 +656,8 @@
     </div>
 
     <!-- Modal para crear tipo empaque -->
-    <div class="modal fade" id="createTipoEmpaqueModal" tabindex="-1"
-        aria-labelledby="createTipoEmpaqueModalLabel">
+    <div class="modal fade" id="createTipoEmpaqueModal" tabindex="-1" aria-labelledby="createTipoEmpaqueModalLabel"
+        wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

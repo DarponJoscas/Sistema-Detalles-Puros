@@ -68,8 +68,7 @@
                                     </div>
                                     <div class="d-inline-block mb-1">
                                         <button type="button" class="btn btn-danger"
-                                            wire:click="deleteUsuario({{ $dato['id_usuario'] }})"
-                                            onclick="return confirm('¿Está seguro de desactivar este usuario?')">
+                                            wire:click="deleteUsuario({{ $dato['id_usuario'] }})">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -81,8 +80,7 @@
                                     </div>
                                 @else
                                     <button type="button" class="btn btn-success"
-                                        wire:click="reactivarUsuario({{ $dato['id_usuario'] }})"
-                                        onclick="return confirm('¿Está seguro de reactivar este usuario?')">
+                                        wire:click="reactivarUsuario({{ $dato['id_usuario'] }})">
                                         <i class="bi bi-arrow-clockwise"></i> Reactivar
                                     </button>
                                 @endif
@@ -99,7 +97,7 @@
 
 
     <!-- Modal de registro de usuario -->
-    <div class="modal fade" id="registrarusuarioModal" tabindex="-1" aria-labelledby="registerUserModalLabel">
+    <div class="modal fade" id="registrarusuarioModal" tabindex="-1" aria-labelledby="registerUserModalLabel" wire:ignore>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -133,7 +131,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" wire:click="register">Guardar
+                    <button type="button" class="btn btn-primary"  data-bs-dismiss="modal" wire:click="register">Guardar
                         Usuario</button>
                 </div>
             </div>
@@ -193,13 +191,6 @@
                             <label for="update-contrasena-nueva">Nueva Contraseña:</label>
                             <input type="password" wire:model="contrasena_usuario" id="update-contrasena-nueva"
                                 class="form-control" placeholder="Ingrese su nueva contraseña">
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="update-contrasena-confirm">Confirmar Contraseña:</label>
-                            <input type="password" wire:model="contrasena_usuario_confirm"
-                                id="update-contrasena-confirm" class="form-control"
-                                placeholder="Confirma la nueva contraseña">
                         </div>
                     </form>
                 </div>

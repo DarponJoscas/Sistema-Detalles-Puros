@@ -18,23 +18,38 @@ class InfoEmpaques extends Component
 
     public $totalGuardados = 0;
     public $totalNoGuardados = 0;
-    public $filtro_codigo_empaque = null, $filtro_codigo_puro = null, $filtro_tipo_empaque = null;
-    public $empaques = [], $puros = [], $tiposEmpaque = [], $imagen_anillado;
+    public $filtro_tipo_empaque = null;
+    public $empaques = [], $puros = [], $tiposEmpaque = [];
     public $perPage = 25;
-    public $page = 1;
+    public $filtro_codigo_puro = null;
+    public $filtro_presentacion = [];
+    public $filtro_vitola = null;
+    public $filtro_alias_vitola = null;
+    public $filtro_capa = null;
+    public $filtro_codigo_empaque = null;
+    public $vitolas, $marcas, $alias_vitolas, $capas, $presentaciones;
     protected $paginationTheme = 'bootstrap';
+    public $imagen_anillado = [];
+    public $imagen_caja = [];
+    public $imagen_produccion = [];
 
-    public function filtrarEmpaque()
+    public function filtrarPedidos()
     {
         $this->resetPage();
     }
 
     public function getInfoEmpaque()
     {
-        $results = DB::select("CALL GetInfoEmpaque(?, ?, ?)", [
+        $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
+
+        $results = DB::select("CALL GetInfoEmpaque(?, ?, ?, ?, ?, ?, ?)", [
             $this->filtro_codigo_empaque,
+            $presentacionesString,
             $this->filtro_codigo_puro,
-            $this->filtro_tipo_empaque
+            $this->filtro_tipo_empaque,
+            $this->filtro_vitola,
+            $this->filtro_alias_vitola,
+            $this->filtro_capa,
         ]);
 
         $collection = collect($results)->map(function ($row) {
@@ -47,11 +62,11 @@ class InfoEmpaques extends Component
                 'tipo_empaque' => $row->tipo_empaque ?? '',
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',
                 'anillo' => $row->anillo ?? '',
-                'imagen_anillado' => $row->imagen_anillado ?? '',
+                'imagen_anillado' => $row->imagen_anillado ? json_decode($row->imagen_anillado) : [],
                 'sello' => $row->sello ?? '',
                 'upc' => $row->upc ?? '',
                 'codigo_caja' => $row->codigo_caja ?? '',
-                'imagen_caja' => $row->imagen_caja ?? '',
+                'imagen_caja' => $row->imagen_caja ? json_decode($row->imagen_caja) : [],
                 'estado_empaque' => $row->estado_empaque ?? '',
                 'created_at' => $row->created_at ?? '',
                 'updated_at' => $row->updated_at ?? ''
@@ -75,7 +90,7 @@ class InfoEmpaques extends Component
     {
         try {
             set_time_limit(300);
-            $apiUrl = env('APP_URL') . '/api/clase_producto/empaque';
+            $apiUrl = env('APP_URL') . 'api/clase_producto/empaque';
             $response = Http::timeout(30)->get($apiUrl);
 
             if (!$response->successful()) {
@@ -147,6 +162,11 @@ class InfoEmpaques extends Component
             }
 
             DB::commit();
+            $this->dispatch('swal', json_encode([
+                'title' => 'Éxito',
+                'text' => 'Datos importados exitosamente.',
+                'icon' => 'success',
+            ]));
             $this->totalGuardados = $guardados;
             $this->totalNoGuardados = $noGuardados;
         } catch (\Exception $e) {
@@ -160,7 +180,14 @@ class InfoEmpaques extends Component
         return view('livewire.info-empaques', [
             'datosPaginados' => $this->getInfoEmpaque(),
             'totalGuardados' => $this->totalGuardados,
-            'totalNoGuardados' => $this->totalNoGuardados
+            'totalNoGuardados' => $this->totalNoGuardados,
+            $this->vitolas = DB::table('vitola')->get(['vitola']),
+            $this->marcas = DB::table('marca')->get(['marca']),
+            $this->alias_vitolas = DB::table('alias_vitola')->get(['alias_vitola']),
+            $this->capas = DB::table('capa')->get(['capa']),
+            $this->puros = DB::table('info_puro')->get(['codigo_puro']),
+            $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
+            $this->empaques = DB::table('info_empaque')->get(['codigo_empaque']),
         ])->extends('layouts.app')->section('content');
     }
 }

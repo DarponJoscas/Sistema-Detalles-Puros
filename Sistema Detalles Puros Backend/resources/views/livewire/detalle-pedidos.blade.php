@@ -1,4 +1,25 @@
 <div>
+    <style>
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+    </style>
+
     <div>
         <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
             <div wire:ignore class="row g-0">
@@ -20,15 +41,26 @@
                     </select>
                 </div>
 
-                <div wire:ignore class="col px-1" style="width: 190px; flex: none;">
-                    <select id="presentacionPuro" wire:model="filtro_presentacion" wire:change="filtrarPedidos">
-                        <option value="">Buscar presentación puro</option>
-                        @foreach ($presentaciones as $presentacion)
-                            <option value="{{ $presentacion->presentacion_puro }}">
-                                {{ $presentacion->presentacion_puro }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div  class="col px-1" style="width: 240px; flex: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion" data-bs-toggle="dropdown" aria-expanded="false">
+                            Buscar Presentación Puro
+                        </button>
+                        <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion" style="max-height: 300px; overflow-y: auto;">
+                            @foreach ($presentaciones as $presentacion)
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           value="{{ $presentacion->presentacion_puro }}"
+                                           id="presentacion-{{ $loop->index }}"
+                                           wire:model="filtro_presentacion"
+                                           wire:change="filtrarPedidos">
+                                    <label class="form-check-label" for="presentacion-{{ $loop->index }}">
+                                        {{ $presentacion->presentacion_puro }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
 
                 <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
@@ -134,7 +166,7 @@
                     </thead>
                     <tbody class="text-center">
                         @foreach ($datosPaginados as $dato)
-                            <tr>
+                            <tr class="{{ $dato['estado_pedido'] == 0 ? 'table-secondary text-muted' : '' }}">
                                 <td>{{ $dato['id_pedido'] }}</td>
                                 <td>{{ $dato['cliente'] }}</td>
                                 <td>{{ $dato['codigo_puro'] }}</td>
@@ -145,54 +177,88 @@
                                 <td>{{ $dato['capa'] }}</td>
                                 <td>{{ $dato['descripcion_produccion'] }}</td>
                                 <td>
-                                    @if ($dato['imagen_produccion'])
-                                        <img src="{{ asset('storage/' . $dato['imagen_produccion']) }}"
-                                            alt="Imagen Producción" width="100" height="100"
-                                            class="d-block mx-auto rounded">
+                                    @if (!empty($dato['imagen_produccion']) && is_array($dato['imagen_produccion']))
+                                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                                            @foreach ($dato['imagen_produccion'] as $img)
+                                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen Producción"
+                                                    width="80" height="80" class="rounded" style="cursor:pointer"
+                                                    onclick="showLightbox('{{ asset('storage/' . $img) }}')">
+                                            @endforeach
+                                        </div>
                                     @else
                                         <span class="text-muted">Sin Imagen</span>
                                     @endif
+
                                 </td>
                                 <td>{{ $dato['codigo_empaque'] }}</td>
                                 <td>{{ $dato['sampler'] }}</td>
                                 <td>{{ $dato['descripcion_empaque'] }}</td>
                                 <td>{{ $dato['anillo'] }}</td>
                                 <td>
-                                    @if ($dato['imagen_anillado'])
-                                        <img src="{{ asset('storage/' . $dato['imagen_anillado']) }}"
-                                            alt="Imagen Anillado" width="100" height="100"
-                                            class="d-block mx-auto rounded">
+                                    @if (!empty($dato['imagen_anillado']) && is_array($dato['imagen_anillado']))
+                                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                                            @foreach ($dato['imagen_anillado'] as $img)
+                                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen anillado"
+                                                    width="80" height="80" class="rounded" style="cursor:pointer"
+                                                    onclick="showLightbox('{{ asset('storage/' . $img) }}')">
+                                            @endforeach
+                                        </div>
                                     @else
                                         <span class="text-muted">Sin Imagen</span>
                                     @endif
+
+                                    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+                                        <img id="lightbox-img" src="">
+                                    </div>
                                 </td>
                                 <td>{{ $dato['sello'] }}</td>
                                 <td>{{ $dato['upc'] }}</td>
                                 <td>{{ $dato['tipo_empaque'] }}</td>
                                 <td>{{ $dato['codigo_caja'] }}</td>
                                 <td>
-                                    @if ($dato['imagen_caja'])
-                                        <img src="{{ asset('storage/' . $dato['imagen_caja']) }}" alt="Imagen Caja"
-                                            width="100" height="100" class="d-block mx-auto rounded">
+                                    @if (!empty($dato['imagen_caja']) && is_array($dato['imagen_caja']))
+                                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                                            @foreach ($dato['imagen_caja'] as $img)
+                                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen Caja"
+                                                    width="80" height="80" class="rounded"
+                                                    style="cursor:pointer"
+                                                    onclick="showLightbox('{{ asset('storage/' . $img) }}')">
+                                            @endforeach
+                                        </div>
                                     @else
                                         <span class="text-muted">Sin Imagen</span>
                                     @endif
-                                </td>
-                                <td>{{ $dato['estado_pedido'] }}</td>
-                                <td>
-                                    <div class="d-inline-block m-1">
-                                        <button type="button" class="btn btn-warning"
-                                            wire:click="editarPedido({{ $dato['id_pedido'] }})">
-                                            <i class="bi bi-pencil-square text-white"></i>
-                                        </button>
-                                    </div>
 
-                                    <div class="d-inline-block">
-                                        <button type="button" class="btn btn-danger"
-                                            wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+                                        <img id="lightbox-img" src="">
                                     </div>
+                                </td>
+                                <td><span
+                                        class="badge {{ $dato['estado_pedido'] == 1 ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $dato['estado_pedido'] == 1 ? 'Activo' : 'Inactivo' }}
+                                    </span></td>
+                                <td>
+                                    @if ($dato['estado_pedido'] == 1)
+                                        <div class="d-inline-block m-1">
+                                            <button type="button" class="btn btn-warning"
+                                                wire:click="editarPedido({{ $dato['id_pedido'] }})"
+                                                onclick="document.getElementById('select-cliente').tomselect.setValue({{ $dato['id_cliente'] }});document.getElementById('select-codigo-empaque').tomselect.setValue('{{ trim($dato['codigo_empaque']) }}')">
+                                                <i class="bi bi-pencil-square text-white"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="d-inline-block">
+                                            <button type="button" class="btn btn-danger"
+                                                wire:click="eliminarPedido({{ $dato['id_pedido'] }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    @else
+                                        <button type="button" class="btn btn-success"
+                                            wire:click="reactivarPedido('{{ $dato['id_pedido'] }}')">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -207,7 +273,7 @@
 
     <!-- Modal de Registro de Pedido-->
     <div class="modal fade" id="registrarpedidoempaqueModal" tabindex="-1" aria-labelledby="registrarPedidoLabel"
-    wire:ignore.self>
+        wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -219,7 +285,7 @@
                         @endif
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        title="Cerrar modal"></button>
+                    wire:click="closeEmpaqueModal" title="Cerrar modal"></button>
                 </div>
                 <div class="modal-body">
                     <form>
@@ -241,7 +307,7 @@
                             <select wire:model="codigo_empaque" id="select-codigo-empaque" wire:change="infoEmpaque">
                                 <option value="">Seleccione un código de empaque</option>
                                 @foreach ($empaques as $empaque)
-                                    <option value="{{ $empaque->codigo_empaque }}">{{ $empaque->codigo_empaque }}
+                                    <option value="{{ trim($empaque->codigo_empaque) }}">{{ $empaque->codigo_empaque }}
                                     </option>
                                 @endforeach
                             </select>
@@ -306,21 +372,36 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="imagen_anillado">Imagen de Anillado:</label>
-                            <input type="file" wire:model="imagen_anillado" id="imagen_anillado"
-                                class="form-control">
-                            @if ($imagen_anillado && is_object($imagen_anillado))
-                                <div class="mt-2">
-                                    <img src="{{ $imagen_anillado->temporaryUrl() }}" class="img-thumbnail"
-                                        width="150">
-                                </div>
-                            @elseif ($imagen_anillado && !is_object($imagen_anillado))
-                                <div class="mt-2">
-                                    <img src="{{ asset('storage/' . $imagen_anillado) }}" class="img-thumbnail"
-                                        width="150">
+                            <label for="imagen_anillado">Imágenes de Anillado (máx. 3):</label>
+                            <input type="file" wire:model="imagen_anillado_nuevas" id="imagen_anillado"
+                                class="form-control" multiple accept="image/*">
+
+                            @if ($imagen_anillado || $imagen_anillado_nuevas)
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    {{-- Existentes --}}
+                                    @foreach ($imagen_anillado as $index => $imagen)
+                                        <div>
+                                            <img src="{{ asset('storage/' . $imagen) }}" class="img-thumbnail"
+                                                width="150">
+                                            <p class="text-center">Imagen guardada {{ $index + 1 }}</p>
+                                            <button type="button"
+                                                wire:click="eliminarImagenExistente('anillado', {{ $index }})"
+                                                class="btn btn-sm btn-danger mt-1">Eliminar</button>
+                                        </div>
+                                    @endforeach
+
+                                    {{-- Nuevas --}}
+                                    @foreach ($imagen_anillado_nuevas as $index => $imagen)
+                                        <div>
+                                            <img src="{{ $imagen->temporaryUrl() }}" class="img-thumbnail"
+                                                width="150">
+                                            <p class="text-center">Nueva Imagen {{ $index + 1 }}</p>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
                         </div>
+
 
                         <div class="form-group mb-3">
                             <label for="sello">Sello:</label>
@@ -339,20 +420,38 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="imagen_caja">Imagen de Caja:</label>
-                            <input type="file" wire:model="imagen_caja" id="imagen_caja" class="form-control">
-                            @if ($imagen_caja && is_object($imagen_caja))
-                                <div class="mt-2">
-                                    <img src="{{ $imagen_caja->temporaryUrl() }}" class="img-thumbnail"
-                                        width="150">
-                                </div>
-                            @elseif ($imagen_caja && !is_object($imagen_caja))
-                                <div class="mt-2">
-                                    <img src="{{ asset('storage/' . $imagen_caja) }}" class="img-thumbnail"
-                                        width="150">
+                            <label for="imagen_caja">Imágenes de Caja (máx. 3):</label>
+                            <input type="file" wire:model="imagen_caja_nuevas" id="imagen_caja"
+                                class="form-control" multiple accept="image/*">
+
+                            @if ($imagen_caja || $imagen_caja_nuevas)
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    {{-- Existentes --}}
+                                    @foreach ($imagen_caja as $index => $imagen)
+                                        @if (is_string($imagen))
+                                            <div>
+                                                <img src="{{ asset('storage/' . $imagen) }}" class="img-thumbnail"
+                                                    width="150">
+                                                <p class="text-center">Imagen guardada {{ $index + 1 }}</p>
+                                                <button type="button"
+                                                    wire:click="eliminarImagenExistente('caja', {{ $index }})"
+                                                    class="btn btn-sm btn-danger mt-1">Eliminar</button>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Nuevas --}}
+                                    @foreach ($imagen_caja_nuevas as $index => $imagen)
+                                        <div>
+                                            <img src="{{ $imagen->temporaryUrl() }}" class="img-thumbnail"
+                                                width="150">
+                                            <p class="text-center">Nueva Imagen {{ $index + 1 }}</p>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
                         </div>
+
 
                         <div class="form-group mb-3">
                             <label for="descripcion_produccion">Descripción Producción:</label>
@@ -361,28 +460,44 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="imagen_produccion">Imagen de Producción:</label>
-                            <input type="file" wire:model="imagen_produccion" id="imagen_produccion"
-                                class="form-control">
-                            @if ($imagen_produccion && is_object($imagen_produccion))
-                                <div class="mt-2">
-                                    <img src="{{ $imagen_produccion->temporaryUrl() }}" class="img-thumbnail"
-                                        width="150">
-                                </div>
-                            @elseif ($imagen_produccion && !is_object($imagen_produccion))
-                                <div class="mt-2">
-                                    <img src="{{ asset('storage/' . $imagen_produccion) }}" class="img-thumbnail"
-                                        width="150">
+                            <label for="imagen_produccion">Imágenes de Producción (máx. 3):</label>
+                            <input type="file" wire:model="imagen_produccion_nuevas" id="imagen_produccion"
+                                class="form-control" multiple accept="image/*">
+
+                            @if ($imagen_produccion || $imagen_produccion_nuevas)
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    {{-- Existentes --}}
+                                    @foreach ($imagen_produccion as $index => $imagen)
+                                        @if (is_string($imagen))
+                                            <div>
+                                                <img src="{{ asset('storage/' . $imagen) }}" class="img-thumbnail"
+                                                    width="150">
+                                                <p class="text-center">Imagen guardada {{ $index + 1 }}</p>
+                                                <button type="button"
+                                                    wire:click="eliminarImagenExistente('produccion', {{ $index }})"
+                                                    class="btn btn-sm btn-danger mt-1">Eliminar</button>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Nuevas --}}
+                                    @foreach ($imagen_produccion_nuevas as $index => $imagen)
+                                        <div>
+                                            <img src="{{ $imagen->temporaryUrl() }}" class="img-thumbnail"
+                                                width="150">
+                                            <p class="text-center">Nueva Imagen {{ $index + 1 }}</p>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
                         </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                         wire:click="closeEmpaqueModal">Cerrar</button>
-                    <button type="button" class="btn btn-primary"
-                        wire:click="crearDetallePedido">Guardar</button>
+                    <button type="button" class="btn btn-primary" wire:click="crearDetallePedido">Guardar</button>
                 </div>
             </div>
         </div>
@@ -404,7 +519,21 @@
 
                 new TomSelect('#select-cliente');
                 new TomSelect('#select-codigo-empaque');
+
+                Livewire.on('reset-select-cliente', () => {
+                    const selectCliente = document.getElementById('select-cliente');
+                    if (selectCliente && selectCliente.tomselect) {
+                        selectCliente.tomselect.clear();
+                    }
+
+                    const selectCodigoEmpaque = document.getElementById('select-codigo-empaque');
+                    if (selectCodigoEmpaque && selectCodigoEmpaque.tomselect) {
+                        selectCodigoEmpaque.tomselect.clear();
+                    }
+                });
             });
+
+
 
             function limpiarFiltros() {
                 let selectIds = [
@@ -421,7 +550,15 @@
 
                 Livewire.dispatch('resetFilters');
             }
+
+
+
+            function showLightbox(src) {
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox').style.display = 'flex';
+            }
         </script>
+
     @endpush
 
 </div>
