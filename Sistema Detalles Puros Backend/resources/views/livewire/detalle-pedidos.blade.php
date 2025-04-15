@@ -41,19 +41,20 @@
                     </select>
                 </div>
 
-                <div  class="col px-1" style="width: 240px; flex: none;">
+                <div class="col px-1" style="width: 240px; flex: none;">
                     <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             Buscar Presentación Puro
                         </button>
-                        <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion" style="max-height: 300px; overflow-y: auto;">
+                        <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion"
+                            style="max-height: 300px; overflow-y: auto;">
                             @foreach ($presentaciones as $presentacion)
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                           value="{{ $presentacion->presentacion_puro }}"
-                                           id="presentacion-{{ $loop->index }}"
-                                           wire:model="filtro_presentacion"
-                                           wire:change="filtrarPedidos">
+                                        value="{{ $presentacion->presentacion_puro }}"
+                                        id="presentacion-{{ $loop->index }}" wire:model="filtro_presentacion"
+                                        wire:change="filtrarPedidos">
                                     <label class="form-check-label" for="presentacion-{{ $loop->index }}">
                                         {{ $presentacion->presentacion_puro }}
                                     </label>
@@ -181,7 +182,8 @@
                                         <div class="d-flex justify-content-center flex-wrap gap-2">
                                             @foreach ($dato['imagen_produccion'] as $img)
                                                 <img src="{{ asset('storage/' . $img) }}" alt="Imagen Producción"
-                                                    width="80" height="80" class="rounded" style="cursor:pointer"
+                                                    width="80" height="80" class="rounded"
+                                                    style="cursor:pointer"
                                                     onclick="showLightbox('{{ asset('storage/' . $img) }}')">
                                             @endforeach
                                         </div>
@@ -194,44 +196,37 @@
                                 <td>{{ $dato['sampler'] }}</td>
                                 <td>{{ $dato['descripcion_empaque'] }}</td>
                                 <td>{{ $dato['anillo'] }}</td>
-                                <td>
-                                    @if (!empty($dato['imagen_anillado']) && is_array($dato['imagen_anillado']))
-                                        <div class="d-flex justify-content-center flex-wrap gap-2">
-                                            @foreach ($dato['imagen_anillado'] as $img)
-                                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen anillado"
-                                                    width="80" height="80" class="rounded" style="cursor:pointer"
-                                                    onclick="showLightbox('{{ asset('storage/' . $img) }}')">
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span class="text-muted">Sin Imagen</span>
-                                    @endif
-
-                                    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
-                                        <img id="lightbox-img" src="">
-                                    </div>
-                                </td>
                                 <td>{{ $dato['sello'] }}</td>
                                 <td>{{ $dato['upc'] }}</td>
                                 <td>{{ $dato['tipo_empaque'] }}</td>
                                 <td>{{ $dato['codigo_caja'] }}</td>
+
                                 <td>
-                                    @if (!empty($dato['imagen_caja']) && is_array($dato['imagen_caja']))
-                                        <div class="d-flex justify-content-center flex-wrap gap-2">
-                                            @foreach ($dato['imagen_caja'] as $img)
-                                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen Caja"
-                                                    width="80" height="80" class="rounded"
-                                                    style="cursor:pointer"
-                                                    onclick="showLightbox('{{ asset('storage/' . $img) }}')">
+                                    @php
+                                        $imagenes = [];
+                                        if (!empty($dato['imagen_anillado']) && is_array($dato['imagen_anillado'])) {
+                                            $imagenes = array_merge($imagenes, $dato['imagen_anillado']);
+                                        }
+                                        if (!empty($dato['imagen_caja']) && is_array($dato['imagen_caja'])) {
+                                            $imagenes = array_merge($imagenes, $dato['imagen_caja']);
+                                        }
+                                    @endphp
+
+                                    @if (!empty($imagenes))
+                                        <div
+                                            style="display: grid; grid-template-columns: repeat(3, 80px); gap: 6px; padding: 0; margin: 0; justify-items: center; align-items: center; width: 100%;">
+
+                                            @foreach ($imagenes as $img)
+                                                <div style="width: 80px; height: 80px;">
+                                                    <img src="{{ asset('storage/' . $img) }}" alt="Imagen"
+                                                        width="80" height="80" style="display: block; margin: 0; cursor:pointer"
+                                                        onclick="showLightbox('{{ asset('storage/' . $img) }}')">
+                                                </div>
                                             @endforeach
                                         </div>
                                     @else
                                         <span class="text-muted">Sin Imagen</span>
                                     @endif
-
-                                    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
-                                        <img id="lightbox-img" src="">
-                                    </div>
                                 </td>
                                 <td><span
                                         class="badge {{ $dato['estado_pedido'] == 1 ? 'bg-success' : 'bg-danger' }}">
@@ -285,7 +280,7 @@
                         @endif
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                    wire:click="closeEmpaqueModal" title="Cerrar modal"></button>
+                        wire:click="closeEmpaqueModal" title="Cerrar modal"></button>
                 </div>
                 <div class="modal-body">
                     <form>
@@ -307,7 +302,8 @@
                             <select wire:model="codigo_empaque" id="select-codigo-empaque" wire:change="infoEmpaque">
                                 <option value="">Seleccione un código de empaque</option>
                                 @foreach ($empaques as $empaque)
-                                    <option value="{{ trim($empaque->codigo_empaque) }}">{{ $empaque->codigo_empaque }}
+                                    <option value="{{ trim($empaque->codigo_empaque) }}">
+                                        {{ $empaque->codigo_empaque }}
                                     </option>
                                 @endforeach
                             </select>
@@ -503,8 +499,14 @@
         </div>
     </div>
 
+    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="">
+    </div>
+
     @push('scripts')
         <script>
+
+
             document.addEventListener('DOMContentLoaded', function() {
 
                 const pedidoModal = new bootstrap.Modal(document.getElementById('registrarpedidoempaqueModal'));
@@ -533,8 +535,6 @@
                 });
             });
 
-
-
             function limpiarFiltros() {
                 let selectIds = [
                     'cliente', 'codigoPuro', 'presentacionPuro', 'marca',
@@ -558,7 +558,6 @@
                 document.getElementById('lightbox').style.display = 'flex';
             }
         </script>
-
     @endpush
 
 </div>

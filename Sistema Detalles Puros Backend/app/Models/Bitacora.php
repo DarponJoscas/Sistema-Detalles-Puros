@@ -22,6 +22,7 @@ class Bitacora extends Model
         'descripcion',
         'accion',
         'id_usuario',
+        'id_pedido'
     ];
 
     public $timestamps = true;

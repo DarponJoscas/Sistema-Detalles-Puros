@@ -23,6 +23,7 @@ class InfoEmpaques extends Component
     public $perPage = 25;
     public $filtro_codigo_puro = null;
     public $filtro_presentacion = [];
+    public $filtro_marca = null;
     public $filtro_vitola = null;
     public $filtro_alias_vitola = null;
     public $filtro_capa = null;
@@ -36,17 +37,19 @@ class InfoEmpaques extends Component
     public function filtrarPedidos()
     {
         $this->resetPage();
+        $this->dispatch('refresh');
     }
 
     public function getInfoEmpaque()
     {
         $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
 
-        $results = DB::select("CALL GetInfoEmpaque(?, ?, ?, ?, ?, ?, ?)", [
+        $results = DB::select("CALL GetInfoEmpaque(?, ?, ?, ?, ?, ?, ?, ?)", [
             $this->filtro_codigo_empaque,
             $presentacionesString,
             $this->filtro_codigo_puro,
             $this->filtro_tipo_empaque,
+            $this->filtro_marca,
             $this->filtro_vitola,
             $this->filtro_alias_vitola,
             $this->filtro_capa,
@@ -58,6 +61,10 @@ class InfoEmpaques extends Component
                 'codigo_empaque' => $row->codigo_empaque ?? '',
                 'codigo_puro' => $row->codigo_puro ?? '',
                 'presentacion_puro' => $row->presentacion_puro ?? '',
+                'marca' => $row->marca ?? '',
+                'vitola' => $row->vitola ?? '',
+                'alias_vitola' => $row->alias_vitola ?? '',
+                'capa' => $row->capa ?? '',
                 'sampler' => $row->sampler ?? '',
                 'tipo_empaque' => $row->tipo_empaque ?? '',
                 'descripcion_empaque' => $row->descripcion_empaque ?? '',

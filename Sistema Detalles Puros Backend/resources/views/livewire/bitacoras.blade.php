@@ -1,14 +1,7 @@
 <div>
     <div class="d-inline-block m-3" style="z-index: -800; position:absolute;">
         <div class="row g-0">
-            <div wire:ignore class="col px-1" style="width: 180px; flex: none;">
-                <select id="filtroDescripcion" wire:model="filtro_descripcion" wire:change="filtrarBitacora">
-                    <option value="">Seleccione una descripcion</option>
-                    @foreach ($descripciones as $descripcion)
-                        <option value="{{ $descripcion->descripcion }}">{{ $descripcion->descripcion }}</option>
-                    @endforeach
-                </select>
-            </div>
+
             <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
                 <select id="filtroAccion" wire:model="filtro_accion" wire:change="filtrarBitacora">
                     <option value="">Seleccione una accion</option>
@@ -25,6 +18,75 @@
                     @endforeach
                 </select>
             </div>
+
+            <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                <select id="codigoPuro" wire:model="filtro_codigo_puro" wire:change="filtrarBitacora">
+                    <option value="">Buscar un código puro</option>
+                    @foreach ($puros as $puro)
+                        <option value="{{ $puro->codigo_puro }}">{{ $puro->codigo_puro }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col px-1" style="width: 240px; flex: none;">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Buscar Presentación Puro
+                    </button>
+                    <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion"
+                        style="max-height: 300px; overflow-y: auto;">
+                        @foreach ($presentaciones as $presentacion)
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                    value="{{ $presentacion->presentacion_puro }}"
+                                    id="presentacion-{{ $loop->index }}" wire:model="filtro_presentacion"
+                                    wire:change="filtrarBitacora">
+                                <label class="form-check-label" for="presentacion-{{ $loop->index }}">
+                                    {{ $presentacion->presentacion_puro }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                <select id="marca" wire:model="filtro_marca" wire:change="filtrarBitacora">
+                    <option value="">Buscar marca</option>
+                    @foreach ($marcas as $marca)
+                        <option value="{{ $marca->marca }}">{{ $marca->marca }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                <select id="vitola" wire:model="filtro_vitola" wire:change="filtrarBitacora">
+                    <option value="">Buscar vitola</option>
+                    @foreach ($vitolas as $vitola)
+                        <option value="{{ $vitola->vitola }}">{{ $vitola->vitola }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                <select id="aliasVitola" wire:model="filtro_alias_vitola" wire:change="filtrarBitacora">
+                    <option value="">Buscar alias vitola</option>
+                    @foreach ($alias_vitolas as $alias_vitola)
+                        <option value="{{ $alias_vitola->alias_vitola }}">{{ $alias_vitola->alias_vitola }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
+                <select id="capa" wire:model="filtro_capa" wire:change="filtrarBitacora">
+                    <option value="">Buscar capa</option>
+                    @foreach ($capas as $capa)
+                        <option value="{{ $capa->capa }}">{{ $capa->capa }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
         <div>
@@ -36,6 +98,12 @@
                             <th style="width: 10%">Descripción</th>
                             <th style="width: 10%">Acción</th>
                             <th style="width: 10%">Usuario</th>
+                            <th>Código Puro</th>
+                            <th>Presentación</th>
+                            <th>Marca</th>
+                            <th>Vitola</th>
+                            <th>Alias Vitola</th>
+                            <th>Capa</th>
                             <th style="width: 10%">Fecha de Creación</th>
                         </tr>
                     </thead>
@@ -48,6 +116,12 @@
                                 <td>{{ $dato['descripcion'] }}</td>
                                 <td>{{ $dato['accion'] }}</td>
                                 <td>{{ $dato['usuario'] }}</td>
+                                <td>{{ $dato['codigo_puro'] }}</td>
+                                <td>{{ $dato['presentacion_puro'] }}</td>
+                                <td>{{ $dato['marca'] }}</td>
+                                <td>{{ $dato['vitola'] }}</td>
+                                <td>{{ $dato['alias_vitola'] }}</td>
+                                <td>{{ $dato['capa'] }}</td>
                                 <td>{{ $dato['fecha_creacion'] }}</td>
                             </tr>
                         @endforeach
@@ -64,7 +138,6 @@
         <script>
             new TomSelect('#filtroUsuarios');
             new TomSelect('#filtroAccion');
-            new TomSelect('#filtroDescripcion');
         </script>
     @endpush
 </div>

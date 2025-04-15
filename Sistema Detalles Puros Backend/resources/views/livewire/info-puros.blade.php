@@ -26,19 +26,20 @@
                         </select>
                     </div>
 
-                    <div  class="col px-1" style="width: 240px; flex: none;" wire:ignore>
+                    <div class="col px-1" style="width: 240px; flex: none;" wire:ignore>
                         <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion"
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 Buscar Presentación Puro
                             </button>
-                            <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion" style="max-height: 300px; overflow-y: auto;">
+                            <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion"
+                                style="max-height: 300px; overflow-y: auto;">
                                 @foreach ($presentaciones as $presentacion)
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox"
-                                               value="{{ $presentacion->presentacion_puro }}"
-                                               id="presentacion-{{ $loop->index }}"
-                                               wire:model="filtro_presentacion"
-                                               wire:change="filtrarPedidos">
+                                            value="{{ $presentacion->presentacion_puro }}"
+                                            id="presentacion-{{ $loop->index }}" wire:model="filtro_presentacion"
+                                            wire:change="filtrarPedidos">
                                         <label class="form-check-label" for="presentacion-{{ $loop->index }}">
                                             {{ $presentacion->presentacion_puro }}
                                         </label>
@@ -87,16 +88,18 @@
                 </div>
             </div>
             <div class="d-flex justify-content-between mt-2">
-                <div wire:loading.flex class="loading-overlay">
+                <div wire:loading.flex wire:target="importProducts" class="loading-overlay">
                     <div class="spinner-border text-dark" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
 
-                <button class="btn btn-primary" wire:click="importProducts" wire:loading.remove>
+                <button class="btn btn-primary" wire:click="importProducts" wire:loading.remove
+                    wire:target="importProducts">
                     Cargar Puros
                 </button>
             </div>
+
             <div class="mt-3">
                 @if ($processedCount > 0)
                     <p>Se han procesado <strong>{{ $processedCount }}</strong> de
@@ -135,13 +138,12 @@
                             <th style="width: 10%">Alias Vitola</th>
                             <th style="width: 10%">Capa</th>
                             <th style="width: 10%">Estado</th>
-                            <th style="width: 10%">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
                         @foreach ($datosPaginados as $dato)
                             <tr class="{{ $dato['estado_puro'] == 0 ? 'table-secondary text-muted' : '' }}">
-                                <td style="width: 5%">{{ $dato['id_puro']}}</td>
+                                <td style="width: 5%">{{ $dato['id_puro'] }}</td>
                                 <td>{{ $dato['codigo_puro'] }}</td>
                                 <td>{{ $dato['presentacion_puro'] }}</td>
                                 <td>{{ $dato['marca'] }}</td>
@@ -152,27 +154,6 @@
                                     <span class="badge {{ $dato['estado_puro'] == 1 ? 'bg-success' : 'bg-danger' }}">
                                         {{ $dato['estado_puro'] == 1 ? 'Activo' : 'Inactivo' }}
                                     </span>
-                                </td>
-                                <td>
-                                    @if ($dato['estado_puro'] == 1)
-                                        <div class="d-inline-block mb-1">
-                                            <button type="button" class="btn btn-warning"
-                                                wire:click="editPuro('{{ $dato['codigo_puro'] }}')">
-                                                <i class="bi bi-pencil-square text-white"></i>
-                                            </button>
-                                        </div>
-                                        <div class="d-inline-block mb-1">
-                                            <button type="button" class="btn btn-danger"
-                                                wire:click="eliminarPuros('{{ $dato['id_puro'] }}')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    @else
-                                        <button type="button" class="btn btn-success"
-                                            wire:click="reactivarPuro('{{ $dato['codigo_puro'] }}')">
-                                            <i class="bi bi-arrow-clockwise"></i> Reactivar
-                                        </button>
-                                    @endif
                                 </td>
                             </tr>
                         @endforeach

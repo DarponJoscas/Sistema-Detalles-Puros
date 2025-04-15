@@ -13,15 +13,49 @@ class HistorialImagenes extends Component
     public $currentUrl;
     public $perPage = 10;
     protected $paginationTheme = 'bootstrap';
+    public $puros;
+    public $presentaciones;
+    public $marcas;
+    public $alias_vitolas;
+    public $vitolas;
+    public $capas;
+    public $codigo_puro, $marca, $vitola, $alias_vitola, $capa, $presentacion, $puro;
+    public $filtro_codigo_puro = null;
+    public $filtro_presentacion = [];
+    public $filtro_vitola = null;
+    public $filtro_alias_vitola = null;
+    public $filtro_capa = null;
+    public $filtro_marca = null;
+
+    public function filtrarPedidos()
+    {
+        $this->resetPage();
+    }
 
     public function getHistorialImagenes()
     {
-        $results = DB::select("CALL GetHistorialImagenes()");
+        $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
+
+        $results = DB::select("CALL GetHistorialImagenes(?, ?, ?, ?, ?, ?)", [
+            $this->filtro_codigo_puro,
+            $this->filtro_marca,
+            $this->filtro_vitola,
+            $this->filtro_alias_vitola,
+            $this->filtro_capa,
+            $presentacionesString
+        ]);
+
 
         $collection = collect($results)->map(function ($row) {
             return [
                 'id_historial' => $row->id_historial ?? '',
                 'id_pedido' => $row->id_pedido ?? '',
+                'codigo_puro' => $row->codigo_puro ?? '',
+                'presentacion_puro' => $row->presentacion_puro ?? '',
+                'marca' => $row->marca ?? '',
+                'vitola' => $row->vitola ?? '',
+                'alias_vitola' => $row->alias_vitola ?? '',
+                'capa' => $row->capa ?? '',
                 'imagen_produccion' => $row->imagen_produccion ? json_decode($row->imagen_produccion) : [],
                 'imagen_anillado' => $row->imagen_anillado ? json_decode($row->imagen_anillado) : [],
                 'imagen_caja' => $row->imagen_caja ? json_decode($row->imagen_caja) : [],
@@ -46,6 +80,12 @@ class HistorialImagenes extends Component
     {
         return view('livewire.historial-imagenes', [
             'historialImagenes' => $this->getHistorialImagenes(),
+            $this->vitolas = DB::table('vitola')->get(['vitola']),
+            $this->marcas = DB::table('marca')->get(['marca']),
+            $this->alias_vitolas = DB::table('alias_vitola')->get(['alias_vitola']),
+            $this->capas = DB::table('capa')->get(['capa']),
+            $this->puros = DB::table('info_puro')->get(['codigo_puro']),
+            $this->presentaciones = DB::table('info_puro')->distinct()->get(['presentacion_puro']),
         ])->extends('layouts.app')->section('content');;
     }
 }

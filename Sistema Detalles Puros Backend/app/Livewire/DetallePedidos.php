@@ -141,16 +141,19 @@ class DetallePedidos extends Component
         $this->filtro_alias_vitola = null;
         $this->filtro_capa = null;
         $this->filtro_codigo_empaque = null;
+
     }
+
 
     public function getDatos()
     {
         $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
 
-        $results = DB::select("CALL GetDetallePedido(?, ?, ?, ?, ?, ?, ?)", [
+        $results = DB::select("CALL GetDetallePedido(?, ?, ?, ?, ?, ?, ?, ?)", [
             $this->filtro_cliente,
             $this->filtro_codigo_puro,
             $presentacionesString,
+            $this->filtro_marca,
             $this->filtro_vitola,
             $this->filtro_alias_vitola,
             $this->filtro_capa,
@@ -165,7 +168,7 @@ class DetallePedidos extends Component
                 'id_cliente' => $row->id_cliente ?? '',
                 'cliente' => $row->name_cliente ?? '',
                 'codigo_puro' => $row->codigo_puro ?? '',
-                'presentacion_puro' => $row->presentacion_puro ?? '' ,
+                'presentacion_puro' => $row->presentacion_puro ?? '',
                 'marca' => $row->marca ?? '',
                 'alias_vitola' => $row->alias_vitola ?? '',
                 'vitola' => $row->vitola ?? '',
@@ -338,8 +341,9 @@ class DetallePedidos extends Component
 
             Bitacora::create([
                 'descripcion' => $detallePedido->wasRecentlyCreated
-                    ? 'Se creó un nuevo pedido con ID: ' . $id_pedido
-                    : 'Se actualizó el pedido con ID: ' . $id_pedido,
+                    ? 'Se creó un nuevo pedido con descripción de produccion y empaque: ' .  $this->descripcion_produccion . $this->descripcion_empaque
+                    : 'Se actualizo un nuevo pedido con descripción de produccion y empaque: ' .  $this->descripcion_produccion . $this->descripcion_empaque,
+                'id_pedido' => $id_pedido,
                 'accion' => $detallePedido->wasRecentlyCreated ? 'Crear' : 'Actualización',
                 'id_usuario' => $this->getAuthUserId(),
             ]);

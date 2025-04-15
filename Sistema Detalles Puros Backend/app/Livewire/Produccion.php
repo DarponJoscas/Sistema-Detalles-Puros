@@ -47,7 +47,7 @@ class Produccion extends Component
     public $filtro_cliente = null;
     public $filtro_codigo_puro = null;
     public $filtro_codigo_empaque = null;
-    public $filtro_presentacion = null;
+    public $filtro_presentacion = [];
     public $filtro_vitola = null;
     public $filtro_alias_vitola = null;
     public $filtro_capa = null;
@@ -117,7 +117,7 @@ class Produccion extends Component
     {
         $this->filtro_cliente = null;
         $this->filtro_codigo_puro = null;
-        $this->filtro_presentacion = null;
+        $this->filtro_presentacion = [];
         $this->filtro_marca = null;
         $this->filtro_vitola = null;
         $this->filtro_alias_vitola = null;
@@ -127,10 +127,12 @@ class Produccion extends Component
 
     public function getDatos()
     {
-        $results = DB::select("CALL GetDetallePedido(?, ?, ?, ?, ?, ?, ?)", [
+        $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
+        $results = DB::select("CALL GetDetallePedido(?, ?, ?, ?, ?, ?, ?, ?)", [
             $this->filtro_cliente,
             $this->filtro_codigo_puro,
-            $this->filtro_presentacion,
+            $presentacionesString,
+            $this->filtro_marca,
             $this->filtro_vitola,
             $this->filtro_alias_vitola,
             $this->filtro_capa,
@@ -287,7 +289,8 @@ class Produccion extends Component
             ]);
 
             Bitacora::create([
-                'descripcion' => 'Se actualizó la descripción del pedido con ID: ' . $this->id_pedido . 'La descripción de la producción es: ' . $this->descripcion_produccion,
+                'descripcion' => 'La descripción de producción se actualizo a: ' . $this->descripcion_produccion,
+                'id_pedido' => $this->id_pedido,
                 'accion' => 'Actualización',
                 'id_usuario' => $this->getAuthUserId(),
             ]);
@@ -359,26 +362,8 @@ class Produccion extends Component
                 'alias_vitola',
                 'vitola',
                 'capa',
-                'upc',
-                'tipo_empaque',
-                'anillo',
-                'sampler',
-                'sello',
-                'upc',
                 'descripcion_produccion',
-                'descripcion_empaque',
                 'imagen_produccion',
-                'imagen_anillado',
-                'imagen_caja',
-                'imagen_produccion_existentes',
-                'imagen_anillado_existentes',
-                'imagen_caja_existentes',
-                'imagen_produccion_nuevas',
-                'imagen_anillado_nuevas',
-                'imagen_caja_nuevas',
-                'imagenProduccionActual',
-                'imagenAnilladoActual',
-                'imagenCajaActual',
                 'error_puro'
             ]);
 

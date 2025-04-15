@@ -34,11 +34,8 @@
     </style>
     <div class="d-inline-block m-3" style="z-index: -800; position: absolute;">
         <div>
-
-
             <!-- Tabla de resultados -->
             <div>
-
                 <div class="row g-0">
                     <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
                         <select id="codigoPuro" wire:model="filtro_codigo_puro" wire:change="filtrarPedidos">
@@ -49,19 +46,20 @@
                         </select>
                     </div>
 
-                    <div  wire:ignore class="col px-1" style="width: 240px; flex: none;">
+                    <div wire:ignore class="col px-1" style="width: 240px; flex: none;">
                         <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPresentacion"
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 Buscar Presentación Puro
                             </button>
-                            <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion" style="max-height: 300px; overflow-y: auto;">
+                            <div class="dropdown-menu p-2" aria-labelledby="dropdownPresentacion"
+                                style="max-height: 300px; overflow-y: auto;">
                                 @foreach ($presentaciones as $presentacion)
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox"
-                                               value="{{ $presentacion->presentacion_puro }}"
-                                               id="presentacion-{{ $loop->index }}"
-                                               wire:model="filtro_presentacion"
-                                               wire:change="filtrarPedidos">
+                                            value="{{ $presentacion->presentacion_puro }}"
+                                            id="presentacion-{{ $loop->index }}" wire:model="filtro_presentacion"
+                                            wire:change="filtrarPedidos">
                                         <label class="form-check-label" for="presentacion-{{ $loop->index }}">
                                             {{ $presentacion->presentacion_puro }}
                                         </label>
@@ -107,19 +105,10 @@
                             @endforeach
                         </select>
                     </div>
-
-                    <div wire:ignore class="col px-1" style="width: 160px; flex: none;">
-                        <select id="codigoItem" wire:model="filtro_codigo_empaque" wire:change="filtrarPedidos">
-                            <option value="">Buscar item</option>
-                            @foreach ($empaques as $empaque)
-                                <option value="{{ $empaque->codigo_empaque }}">{{ $empaque->codigo_empaque }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
 
                 <div class="d-flex justify-content-between mt-2">
-                    <div wire:loading.flex class="loading-overlay">
+                    <div wire:loading.flex wire:target="importEmpaque" class="loading-overlay">
                         <div class="spinner-border text-dark" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
@@ -128,95 +117,103 @@
                     <button class="btn btn-primary" wire:click="importEmpaque">Cargar Empaque</button>
                 </div>
 
-
-
-                <div class="table-responsive text-center">
-                    <table id="tablaEmpaques" class="table mt-3 text-center align-middle">
-                        <thead class="text-center">
-                            <tr>
-                                <th>N°</th>
-                                <th>Código Empaque</th>
-                                <th>Código Puro</th>
-                                <th>Presentación</th>
-                                <th>Sampler</th>
-                                <th>Tipo Empaque</th>
-                                <th>Descripción</th>
-                                <th>Anillo</th>
-                                <th>Imagen Anillado</th>
-                                <th>Sello</th>
-                                <th>UPC</th>
-                                <th>Código Caja</th>
-                                <th>Imagen Caja</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center">
-                            @foreach ($datosPaginados as $dato)
-                                <tr class="{{ $dato['estado_empaque'] == 0 ? 'table-secondary text-muted' : '' }}">
-                                    <td>{{ $dato['id_empaque'] }}</td>
-                                    <td>{{ $dato['codigo_empaque'] }}</td>
-                                    <td>{{ $dato['codigo_puro'] }}</td>
-                                    <td>{{ $dato['presentacion_puro'] }}</td>
-                                    <td>{{ $dato['sampler'] }}</td>
-                                    <td>{{ $dato['tipo_empaque'] }}</td>
-                                    <td>{{ $dato['descripcion_empaque'] }}</td>
-                                    <td>{{ $dato['anillo'] }}</td>
-                                    <td>
-                                        @if (!empty($dato['imagen_anillado']) && is_array($dato['imagen_anillado']))
-                                            <div class="d-flex justify-content-center flex-wrap gap-2">
-                                                @foreach ($dato['imagen_anillado'] as $img)
-                                                    <img src="{{ asset('storage/' . $img) }}" alt="Imagen anillado"
-                                                        width="80" height="80" class="rounded"
-                                                        style="cursor:pointer"
-                                                        onclick="showLightbox('{{ asset('storage/' . $img) }}')">
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <span class="text-muted">Sin Imagen</span>
-                                        @endif
-
-                                        <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
-                                            <img id="lightbox-img" src="">
-                                        </div>
-                                    </td>
-                                    <td>{{ $dato['sello'] }}</td>
-                                    <td>{{ $dato['upc'] }}</td>
-                                    <td>{{ $dato['codigo_caja'] }}</td>
-                                    <td>
-                                        @if (!empty($dato['imagen_caja']) && is_array($dato['imagen_caja']))
-                                            <div class="d-flex justify-content-center flex-wrap gap-2">
-                                                @foreach ($dato['imagen_caja'] as $img)
-                                                    <img src="{{ asset('storage/' . $img) }}" alt="Imagen Caja"
-                                                        width="80" height="80" class="rounded"
-                                                        style="cursor:pointer"
-                                                        onclick="showLightbox('{{ asset('storage/' . $img) }}')">
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <span class="text-muted">Sin Imagen</span>
-                                        @endif
-
-                                        <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
-                                            <img id="lightbox-img" src="">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span
-                                            class="badge {{ $dato['estado_empaque'] == 1 ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $dato['estado_empaque'] == 1 ? 'Activo' : 'Inactivo' }}
-                                        </span>
-                                    </td>
-
+                <div>
+                    <div class="table-responsive text-center">
+                        <table id="tablaEmpaque" class="table mt-3 text-center align-middle">
+                            <thead class="text-center">
+                                <tr>
+                                    <th style="width: 5%">N°</th>
+                                    <th style="width: 10%">Código Empaque</th>
+                                    <th style="width: 10%">Código Puro</th>
+                                    <th style="width: 10%">Presentación</th>
+                                    <th style="width: 10%">Marca</th>
+                                    <th style="width: 10%">Vitola</th>
+                                    <th style="width: 10%">Alias Vitola</th>
+                                    <th style="width: 10%">Capa</th>
+                                    <th style="width: 10%">Sampler</th>
+                                    <th style="width: 10%">Tipo Empaque</th>
+                                    <th style="width: 10%">Descripción</th>
+                                    <th style="width: 10%">Anillo</th>
+                                    <th style="width: 10%">Sello</th>
+                                    <th style="width: 10%">UPC</th>
+                                    <th style="width: 10%">Código Caja</th>
+                                    <th style="width: 10%">Imagenes Empaque</th>
+                                    <th style="width: 10%">Estado</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    <div class="mt-4">
-                        {{ $datosPaginados->links('vendor.pagination.bootstrap-5') }}
+                            </thead>
+                            <tbody class="text-center">
+                                @foreach ($datosPaginados as $dato)
+                                    <tr class="{{ $dato['estado_empaque'] == 0 ? 'table-secondary text-muted' : '' }}">
+                                        <td>{{ $dato['id_empaque'] }}</td>
+                                        <td>{{ $dato['codigo_empaque'] }}</td>
+                                        <td>{{ $dato['codigo_puro'] }}</td>
+                                        <td>{{ $dato['marca'] }}</td>
+                                        <td>{{ $dato['vitola'] }}</td>
+                                        <td>{{ $dato['alias_vitola'] }}</td>
+                                        <td>{{ $dato['capa'] }}</td>
+                                        <td>{{ $dato['presentacion_puro'] }}</td>
+                                        <td>{{ $dato['sampler'] }}</td>
+                                        <td>{{ $dato['tipo_empaque'] }}</td>
+                                        <td>{{ $dato['descripcion_empaque'] }}</td>
+                                        <td>{{ $dato['anillo'] }}</td>
+                                        <td>{{ $dato['sello'] }}</td>
+                                        <td>{{ $dato['upc'] }}</td>
+                                        <td>{{ $dato['codigo_caja'] }}</td>
+                                        <td>
+                                            @php
+                                                $imagenes = [];
+                                                if (
+                                                    !empty($dato['imagen_anillado']) &&
+                                                    is_array($dato['imagen_anillado'])
+                                                ) {
+                                                    $imagenes = array_merge($imagenes, $dato['imagen_anillado']);
+                                                }
+                                                if (!empty($dato['imagen_caja']) && is_array($dato['imagen_caja'])) {
+                                                    $imagenes = array_merge($imagenes, $dato['imagen_caja']);
+                                                }
+                                            @endphp
+
+                                            @if (!empty($imagenes))
+                                                <div
+                                                    style="display: grid; grid-template-columns: repeat(3, 80px); gap: 6px; padding: 0; margin: 0; justify-items: center; align-items: center; width: 100%;">
+
+                                                    @foreach ($imagenes as $img)
+                                                        <div style="width: 80px; height: 80px;">
+                                                            <img src="{{ asset('storage/' . $img) }}" alt="Imagen"
+                                                                width="80" height="80"
+                                                                style="display: block; margin: 0; cursor:pointer"
+                                                                onclick="showLightbox('{{ asset('storage/' . $img) }}')">
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="text-muted">Sin Imagen</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge {{ $dato['estado_empaque'] == 1 ? 'bg-success' : 'bg-danger' }}">
+                                                {{ $dato['estado_empaque'] == 1 ? 'Activo' : 'Inactivo' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <div class="mt-4">
+                            {{ $datosPaginados->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+
+        <!-- Lightbox -->
+        <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+            <img id="lightbox-img" src="">
+        </div>
+
 
         @push('scripts')
             <script>
@@ -227,3 +224,4 @@
             </script>
         @endpush
     </div>
+</div>

@@ -268,26 +268,6 @@
         if (overlay) {
             overlay.addEventListener("click", closeSidebarFunc);
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            let selectIds = [
-                'cliente', 'codigoPuro', 'presentacionPuro', 'marca',
-                'vitola', 'aliasVitola', 'capa', 'codigoItem',
-                'roles', 'marcas', 'tipoEmpaque', 'codigoEmpaque'
-            ];
-
-            selectIds.forEach(id => {
-                let selectElement = document.getElementById(id);
-                if (selectElement) {
-                    selectElement.tomselect = new TomSelect(selectElement, {
-                        allowEmptyOption: true,
-                        create: false,
-                        persist: false
-                    });
-                }
-            });
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
             const logoutIcon = document.getElementById('logout-icon');
 
@@ -404,6 +384,149 @@
             });
         });
     </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectIds = [
+            'cliente',
+            'codigoPuro',
+            'marca',
+            'vitola',
+            'aliasVitola',
+            'capa',
+            'codigoItem'
+        ];
+
+        function initTomSelects() {
+            selectIds.forEach(id => {
+                let existingSelect = document.querySelector(`#${id}`);
+                if (existingSelect && !existingSelect.tomselect) {
+                    new TomSelect(`#${id}`, {
+                        placeholder: existingSelect.options[0]?.text || 'Seleccionar',
+                        onFocus: function () {
+                            let firstOption = this.input.querySelector('option[value=""]');
+                            if (firstOption) firstOption.remove();
+                        }
+                    });
+                }
+            });
+        }
+
+        initTomSelects();
+
+        Livewire.hook('message.processed', () => {
+            initTomSelects();
+        });
+
+        Livewire.on('resetClienteSelect', (clientes) => {
+            let select = TomSelect.getInstance(document.querySelector("#cliente"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar un cliente" });
+
+                clientes.forEach(cliente => {
+                    select.addOption({ value: cliente.name_cliente, text: cliente.name_cliente });
+                });
+
+                select.refreshOptions();
+            }
+        });
+
+        Livewire.on('resetCodigoPuroSelect', (puros) => {
+            let select = TomSelect.getInstance(document.querySelector("#codigoPuro"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar un código puro" });
+
+                puros.forEach(puro => {
+                    select.addOption({ value: puro.codigo_puro, text: puro.codigo_puro });
+                });
+
+                select.refreshOptions();
+            }
+        });
+
+        Livewire.on('resetMarcaSelect', (marcas) => {
+            let select = TomSelect.getInstance(document.querySelector("#marca"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar marca" });
+
+                marcas.forEach(marca => {
+                    select.addOption({ value: marca.marca, text: marca.marca });
+                });
+
+                select.refreshOptions();
+            }
+        });
+
+        Livewire.on('resetVitolaSelect', (vitolas) => {
+            let select = TomSelect.getInstance(document.querySelector("#vitola"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar vitola" });
+
+                vitolas.forEach(vitola => {
+                    select.addOption({ value: vitola.vitola, text: vitola.vitola });
+                });
+
+                select.refreshOptions();
+            }
+        });
+
+        Livewire.on('resetAliasVitolaSelect', (alias_vitolas) => {
+            let select = TomSelect.getInstance(document.querySelector("#aliasVitola"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar alias vitola" });
+
+                alias_vitolas.forEach(alias => {
+                    select.addOption({ value: alias.alias_vitola, text: alias.alias_vitola });
+                });
+
+                select.refreshOptions();
+            }
+        });
+
+        Livewire.on('resetCapaSelect', (capas) => {
+            let select = TomSelect.getInstance(document.querySelector("#capa"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar capa" });
+
+                capas.forEach(capa => {
+                    select.addOption({ value: capa.capa, text: capa.capa });
+                });
+
+                select.refreshOptions();
+            }
+        });
+
+        Livewire.on('resetCodigoItemSelect', (empaques) => {
+            let select = TomSelect.getInstance(document.querySelector("#codigoItem"));
+            if (select) {
+                select.clear();
+                select.clearOptions();
+                select.addOption({ value: "", text: "Buscar item" });
+
+                empaques.forEach(empaque => {
+                    select.addOption({ value: empaque.codigo_empaque, text: empaque.codigo_empaque });
+                });
+
+                select.refreshOptions();
+            }
+        });
+    });
+</script>
+
+
+
 </body>
 
 </html>
