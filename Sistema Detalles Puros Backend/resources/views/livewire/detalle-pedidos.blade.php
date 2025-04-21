@@ -155,12 +155,11 @@
                             <th>Sampler</th>
                             <th>Descripción Empaque</th>
                             <th>Anillo</th>
-                            <th>Imagen Anillado</th>
                             <th>Sello</th>
                             <th>UPC</th>
                             <th>Tipo Empaque</th>
                             <th>Código Caja</th>
-                            <th>Imagen Caja</th>
+                            <th>Imagenes Empaque</th>
                             <th>Estado Pedido</th>
                             <th>Acciones</th>
                         </tr>
