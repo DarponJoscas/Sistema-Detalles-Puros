@@ -482,8 +482,12 @@ class InfoPuros extends Component
     {
         try {
             set_time_limit(300);
-            $apiUrl = env('APP_URL') . 'public/api/materia_prima/productos';
-            $response = Http::timeout(30)->get($apiUrl);
+            $apiUrl = env('APP_URL') . 'api/materia_prima/productos';
+            $response = Http::timeout(30)
+            ->withOptions([
+                'verify' => false,
+            ])
+            ->get($apiUrl);
 
             if (!$response->successful()) {
                 throw new \Exception('Error al obtener datos de la API: ' . $response->status());

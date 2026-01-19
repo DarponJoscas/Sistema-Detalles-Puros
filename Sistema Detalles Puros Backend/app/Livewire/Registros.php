@@ -40,7 +40,7 @@ class Registros extends Component
         'confirmarEliminacionMarca' => 'confirmarEliminacionMarca',
         'confirmarEliminacionVitola' => 'confirmarEliminacionVitola',
         'confirmarEliminacionCapa' => 'confirmarEliminacionCapa',
-        'confirmarEliminacionAliasVitola' => 'confirmarEliminacionAlias',
+        'confirmarEliminacion' => 'confirmarEliminacion',
         'confirmarEliminacionTipoEmpaque' => 'confirmarEliminacionTipoEmpaque',
     ];
 
@@ -94,13 +94,9 @@ class Registros extends Component
                 'name_cliente' => $this->name_cliente,
             ],
             [
-                'id_cliente' => 'required|integer|exists:clientes,id_cliente',
                 'name_cliente' => 'required|string|max:255',
             ],
             [
-                'id_cliente.required' => 'El ID del cliente es obligatorio.',
-                'id_cliente.integer' => 'El ID del cliente debe ser un número entero.',
-                'id_cliente.exists' => 'El cliente no existe en la base de datos.',
                 'name_cliente.required' => 'El nombre del cliente es obligatorio.',
                 'name_cliente.string' => 'El nombre del cliente debe ser una cadena de texto.',
                 'name_cliente.max' => 'El nombre del cliente no puede superar los 255 caracteres.',
@@ -484,11 +480,12 @@ class Registros extends Component
             ];
         });
     }
+
     public function editMarca($marcaId)
     {
         $validator = Validator::make(
             ['id_marca' => $marcaId],
-            ['id_marca' => 'required|integer|exists:marcas,id_marca']
+            ['id_marca' => 'required|integer|exists:marca,id_marca']
         );
 
         if ($validator->fails()) {
@@ -700,7 +697,7 @@ class Registros extends Component
     {
         $validator = Validator::make(
             ['id_capa' => $capaId],
-            ['id_capa' => 'required|integer|exists:capas,id_capa']
+            ['id_capa' => 'required|integer|exists:capa,id_capa']
         );
 
         if ($validator->fails()) {
@@ -1009,7 +1006,7 @@ class Registros extends Component
     {
         $validator = Validator::make(
             ['id_vitola' => $vitolaId],
-            ['id_vitola' => 'required|integer|exists:vitolas,id_vitola']
+            ['id_vitola' => 'required|integer|exists:vitola,id_vitola']
         );
 
         if ($validator->fails()) {
@@ -1215,9 +1212,10 @@ class Registros extends Component
 
     public function deleteAliasVitola($aliasVitolaId)
     {
+
         $validator = Validator::make(
             ['id_aliasvitola' => $aliasVitolaId],
-            ['id_aliasvitola' => 'required|integer|exists:alias_vitolas,id_aliasvitola']
+            ['id_aliasvitola' => 'required|integer|exists:alias_vitola,id_aliasvitola']
         );
 
         if ($validator->fails()) {
@@ -1242,8 +1240,10 @@ class Registros extends Component
         ]));
     }
 
-    public function confirmarEliminacionAliasVitola($aliasVitolaId)
+    public function confirmarEliminacion($aliasVitolaId)
     {
+
+
         try {
             $registro = AliasVitola::where('id_aliasvitola', $aliasVitolaId)->first();
             if ($registro) {
@@ -1426,7 +1426,7 @@ class Registros extends Component
     {
         $validator = Validator::make(
             ['id_tipoempaque' => $tipoEmpaqueId],
-            ['id_tipoempaque' => 'required|integer|exists:tipo_empaque,id_tipoempaque']
+            ['id_tipoempaque' => 'required|integer|exists:tipo_empaques,id_tipoempaque']
         );
 
         if ($validator->fails()) {

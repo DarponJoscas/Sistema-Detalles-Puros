@@ -147,11 +147,12 @@
                                         <td>{{ $dato['id_empaque'] }}</td>
                                         <td>{{ $dato['codigo_empaque'] }}</td>
                                         <td>{{ $dato['codigo_puro'] }}</td>
+                                        <td>{{ $dato['presentacion_puro'] }}</td>
                                         <td>{{ $dato['marca'] }}</td>
                                         <td>{{ $dato['vitola'] }}</td>
                                         <td>{{ $dato['alias_vitola'] }}</td>
                                         <td>{{ $dato['capa'] }}</td>
-                                        <td>{{ $dato['presentacion_puro'] }}</td>
+
                                         <td>{{ $dato['sampler'] }}</td>
                                         <td>{{ $dato['tipo_empaque'] }}</td>
                                         <td>{{ $dato['descripcion_empaque'] }}</td>

@@ -45,14 +45,14 @@ class InfoEmpaques extends Component
         $presentacionesString = !empty($this->filtro_presentacion) ? implode(',', $this->filtro_presentacion) : null;
 
         $results = DB::select("CALL GetInfoEmpaque(?, ?, ?, ?, ?, ?, ?, ?)", [
-            $this->filtro_codigo_empaque,
-            $presentacionesString,
             $this->filtro_codigo_puro,
-            $this->filtro_tipo_empaque,
+            $presentacionesString,
             $this->filtro_marca,
             $this->filtro_vitola,
             $this->filtro_alias_vitola,
             $this->filtro_capa,
+            $this->filtro_tipo_empaque,
+            $this->filtro_codigo_empaque,
         ]);
 
         $collection = collect($results)->map(function ($row) {
@@ -98,7 +98,12 @@ class InfoEmpaques extends Component
         try {
             set_time_limit(300);
             $apiUrl = env('APP_URL') . 'api/clase_producto/empaque';
-            $response = Http::timeout(30)->get($apiUrl);
+            $response = Http::timeout(30)
+            ->withOptions([
+                'verify' => false,
+            ])
+            ->get($apiUrl);
+
 
             if (!$response->successful()) {
                 throw new \Exception('Error al obtener datos de la API: ' . $response->status());
@@ -120,7 +125,7 @@ class InfoEmpaques extends Component
 
             foreach ($empaques as $empaque) {
                 try {
-                    $requiredKeys = ["id_producto", "capa", "item", "codigo_producto", "codigo_caja", "des", "presentacion", "anillo", "cello", "upc", "marca", "vitola", "nombre", "tipo_empaque", "sampler"];
+                    $requiredKeys = ["id_producto", "item", "codigo_producto", "codigo_caja", "des", "presentacion", "anillo", "cello", "upc", "tipo_empaque", "sampler"];
                     foreach ($requiredKeys as $key) {
                         if (!array_key_exists($key, $empaque)) {
                             throw new \Exception("Falta la clave '$key' en el producto: " . json_encode($empaque));
@@ -128,7 +133,7 @@ class InfoEmpaques extends Component
                     }
 
                     $infoPuro = InfoPuro::where('codigo_puro', $empaque['codigo_producto'])->first();
-                    $idPuro = $infoPuro ? $infoPuro->id_puro : null;
+                    $idPuro = $infoPuro->id_puro;
 
                     $tipoEmpaque = TipoEmpaque::firstOrCreate(
                         ['tipo_empaque' => $empaque['tipo_empaque']],
@@ -149,11 +154,9 @@ class InfoEmpaques extends Component
                             'id_tipoempaque' => $tipoEmpaque->id_tipoempaque,
                             'descripcion_empaque' => $empaque['des'] ?? null,
                             'anillo' => $anillo,
-                            'imagen_anillado' => null,
                             'sello' => $cello,
                             'upc' => $upc,
                             'codigo_caja' => $empaque['codigo_caja'] ?? null,
-                            'imagen_caja' => null,
                             'estado_empaque' => 1,
                             'created_at' => now(),
                             'updated_at' => now(),

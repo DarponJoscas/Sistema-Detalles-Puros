@@ -112,7 +112,7 @@
                 <img src="{{ asset('images/plasencia.png') }}" alt="Logo">
             </div>
             <h2 class="title">Iniciar Sesión</h2>
-            <form>
+            <form wire:submit="login">
                 <div class="form-group">
                     <label for="usuario">Usuario:</label>
                     <input type="text" wire:model="usuario" id="usuario" class="form-control"
@@ -139,7 +139,7 @@
                     <p class="success-message text-center">{{ $success_message }}</p>
                 @endif
 
-                <button type="button" class="btn btn-primary" wire:click="login">Ingresar</button>
+                <button type="submit" class="btn btn-primary" >Ingresar</button>
             </form>
         </div>
     </div>

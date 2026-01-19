@@ -301,6 +301,9 @@
             </div>
         </div>
     </div>
+    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="">
+    </div>
 
     @push('scripts')
         <script>

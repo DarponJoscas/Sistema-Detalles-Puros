@@ -363,8 +363,11 @@
                         }
 
                         if (idKey === 'idAliasVitola') {
-                            Livewire.dispatch('confirmarEliminacionAliasVitola', {
+                            console.log(idKey);
+
+                            Livewire.dispatch('confirmarEliminacion', {
                                 aliasVitolaId: idValue
+
                             });
                         }
 
