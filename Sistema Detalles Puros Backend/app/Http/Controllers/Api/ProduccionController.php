@@ -109,18 +109,16 @@ class ProduccionController extends Controller
 
             $id_pedido = $request->input('id_pedido');
             $descripcion = $request->input('descripcion_produccion');
-            $userId = 1; // ID por defecto si no hay auth API implementada, o usar Auth::id() si hay token
+            $userId = 1; 
 
-            // Obtener datos actuales para nombres de archivo
+
             $pedido = DetallePedido::find($id_pedido);
             $puro = InfoPuro::find($pedido->id_puro);
 
-            // 1. Actualizar descripción
             if ($descripcion) {
                 $pedido->descripcion_produccion = $descripcion;
                 $pedido->save();
 
-                // Bitácora
                 Bitacora::create([
                     'descripcion' => 'API: Actualización de producción. Desc: ' . $descripcion,
                     'id_pedido' => $id_pedido,
@@ -129,26 +127,19 @@ class ProduccionController extends Controller
                 ]);
             }
 
-            // 2. Manejo de Imágenes
-            // Recuperar historial actual para no perder imagenes previas si no se envian nuevas
             $historialExistente = DB::table('historial_imagenes')
                 ->where('id_pedido', $id_pedido)
                 ->orderBy('fecha_cambio', 'desc')
                 ->first();
 
-            // Comenzamos con las imágenes que ya existían (del último historial)
-            $imagenesProduccionPaths = $historialExistente ? json_decode($historialExistente->imagen_produccion) : [];
+            $imagenesProduccionPaths = $historialExistente ? (json_decode($historialExistente->imagen_produccion) ?? []) : [];
+            $imagenesAnilladoPaths = $historialExistente ? (json_decode($historialExistente->imagen_anillado) ?? []) : [];
+            $imagenesCajaPaths = $historialExistente ? (json_decode($historialExistente->imagen_caja) ?? []) : [];
 
-            // Anillado y caja se mantienen igual, solo copiamos lo que había
-            $imagenesAnilladoPaths = $historialExistente ? json_decode($historialExistente->imagen_anillado) : [];
-            $imagenesCajaPaths = $historialExistente ? json_decode($historialExistente->imagen_caja) : [];
-
-            // Procesar NUEVAS imagenes subidas
             if ($request->hasFile('imagenes')) {
                 $fechaActual = now()->format('Ymd_His');
                 $codigo_puro = $puro ? $puro->codigo_puro : 'UNK';
 
-                // Calcular indice para nombre
                 $ultimoIndexProduccion = 0;
                 if (!empty($imagenesProduccionPaths)) {
                     foreach ($imagenesProduccionPaths as $imagenPath) {
@@ -172,18 +163,14 @@ class ProduccionController extends Controller
                     $extension = $imagen->getClientOriginalExtension();
                     $nombreArchivo = "{$id_pedido}-{$codigo_puro}-PROD-{$ultimoIndexProduccion}-{$fechaActual}.{$extension}";
 
-                    // Guardar en storage/app/public/imagenes/produccion
                     $path = $imagen->storeAs("imagenes/produccion", $nombreArchivo, 'public');
 
-                    // Agregar al array de paths
                     $imagenesProduccionPaths[] = $path;
                     $ultimoIndexProduccion++;
 
                     Log::info('Imagen guardada API', ['path' => $path]);
                 }
 
-                // Insertar nueva entrada en historial_imagenes solo si hubo cambios de imagenes o descripción
-                // Aca asumimos que siempre generamos historial nuevo al llamar update
                 DB::table('historial_imagenes')->insert([
                     'id_pedido' => $id_pedido,
                     'imagen_produccion' => !empty($imagenesProduccionPaths) ? json_encode($imagenesProduccionPaths) : null,
@@ -200,7 +187,7 @@ class ProduccionController extends Controller
                 'message' => 'Pedido actualizado correctamente',
                 'data' => [
                     'id_pedido' => $id_pedido,
-                    'imagenes_totales' => count($imagenesProduccionPaths)
+                    'imagenes_totales' => is_countable($imagenesProduccionPaths) ? count($imagenesProduccionPaths) : 0,
                 ]
             ]);
         } catch (\Exception $e) {
