@@ -258,6 +258,111 @@
                                 class="form-control">
                         </div>
 
+                        {{-- ===== FICHA TÉCNICA DE PRODUCCIÓN ===== --}}
+                        <hr>
+                        <h6 class="fw-bold text-center mb-3 text-uppercase" style="letter-spacing:1px;">
+                            Ficha Técnica del Proceso de Producción
+                        </h6>
+
+                        {{-- Bloque 1: Datos generales --}}
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Grado de Fortaleza:</label>
+                                <input type="text" wire:model="grado_fortaleza" class="form-control" placeholder="Ej: Medio">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tiro:</label>
+                                <input type="text" wire:model="tiro" class="form-control" placeholder="Ej: 38 - 48">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Detalle de Bonchado:</label>
+                                <input type="text" wire:model="detalle_bonchado" class="form-control" placeholder="Ej: Corriente">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Detalle de Rolado:</label>
+                                <input type="text" wire:model="detalle_rolado" class="form-control" placeholder="Ej: Corriente">
+                            </div>
+                        </div>
+
+                        {{-- Bloque 2: Ligas / Variedad --}}
+                        <label class="form-label fw-bold">Aspectos Generales — Ligas:</label>
+                        <div class="table-responsive mb-2">
+                            <table class="table table-sm table-bordered align-middle mb-1">
+                                <thead class="table-warning text-center">
+                                    <tr>
+                                        <th>Calidad</th>
+                                        <th>Variedad</th>
+                                        <th>Liga</th>
+                                        <th>%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($ligas_produccion as $i => $fila)
+                                    <tr>
+                                        <td><input type="text" wire:model="ligas_produccion.{{ $i }}.calidad"    class="form-control form-control-sm" placeholder="2DA / Clase B"></td>
+                                        <td><input type="text" wire:model="ligas_produccion.{{ $i }}.variedad"   class="form-control form-control-sm" placeholder="Capa / Banda..."></td>
+                                        <td><input type="text" wire:model="ligas_produccion.{{ $i }}.liga"       class="form-control form-control-sm" placeholder="Habano Café Claro..."></td>
+                                        <td><input type="text" wire:model="ligas_produccion.{{ $i }}.porcentaje" class="form-control form-control-sm text-center" placeholder="20%"  style="width:60px;"></td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                wire:click="agregarFila">+ Fila</button>
+                            @if(count($ligas_produccion) > 1)
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                wire:click="quitarFila">− Fila</button>
+                            @endif
+                        </div>
+
+                        {{-- Bloque 3: Norma según consumo --}}
+                        <label class="form-label fw-bold">Tabaco según Norma de Consumo:</label>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-bordered text-center align-middle">
+                                <thead class="table-warning">
+                                    <tr>
+                                        <th></th>
+                                        <th>Capa</th>
+                                        <th>Banda</th>
+                                        <th>Tripa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-start fw-bold text-nowrap">Onzas</td>
+                                        <td><input type="number" step="0.01"   wire:model="norma_capa_onz"  class="form-control form-control-sm text-center"></td>
+                                        <td><input type="number" step="0.01"   wire:model="norma_banda_onz" class="form-control form-control-sm text-center"></td>
+                                        <td><input type="number" step="0.01"   wire:model="norma_tripa_onz" class="form-control form-control-sm text-center"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-start fw-bold text-nowrap">Lbs x Millar</td>
+                                        <td><input type="number" step="0.0001" wire:model="norma_capa_lbs"  class="form-control form-control-sm text-center"></td>
+                                        <td><input type="number" step="0.0001" wire:model="norma_banda_lbs" class="form-control form-control-sm text-center"></td>
+                                        <td><input type="number" step="0.0001" wire:model="norma_tripa_lbs" class="form-control form-control-sm text-center"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Bloque 4: Peso de puro en oro --}}
+                        <label class="form-label fw-bold">Peso de Puro en Oro:</label>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Millar (Lbs):</label>
+                                <input type="number" step="0.01" wire:model="peso_millar_lbs" class="form-control text-center">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Unidad (gr):</label>
+                                <input type="number" step="0.01" wire:model="peso_unidad_gr" class="form-control text-center">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Cien (onz):</label>
+                                <input type="number" step="0.01" wire:model="peso_cien_onz" class="form-control text-center">
+                            </div>
+                        </div>
+
                         <div class="form-group mb-3">
                             <label for="imagen_produccion">Imágenes de Producción (máx. 3):</label>
                             <input type="file" wire:model="imagen_produccion_nuevas" id="imagen_produccion"

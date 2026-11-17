@@ -44,6 +44,28 @@ class Produccion extends Component
     public $imagen_caja = [];
     public $imagen_produccion = [];
 
+    // --- Ficha Técnica de Producción (tabla separada ficha_produccion) ---
+    public $grado_fortaleza  = '';
+    public $detalle_bonchado = '';
+    public $detalle_rolado   = '';
+    public $tiro             = '';
+    public $ligas_produccion = [
+        ['calidad' => '', 'variedad' => 'Capa',  'liga' => '', 'porcentaje' => ''],
+        ['calidad' => '', 'variedad' => 'Banda', 'liga' => '', 'porcentaje' => ''],
+        ['calidad' => '', 'variedad' => 'Seco',  'liga' => '', 'porcentaje' => ''],
+        ['calidad' => '', 'variedad' => 'Viso',  'liga' => '', 'porcentaje' => ''],
+        ['calidad' => '', 'variedad' => 'Viso',  'liga' => '', 'porcentaje' => ''],
+    ];
+    public $norma_capa_onz   = '';
+    public $norma_capa_lbs   = '';
+    public $norma_banda_onz  = '';
+    public $norma_banda_lbs  = '';
+    public $norma_tripa_onz  = '';
+    public $norma_tripa_lbs  = '';
+    public $peso_millar_lbs  = '';
+    public $peso_unidad_gr   = '';
+    public $peso_cien_onz    = '';
+
     public $filtro_cliente = null;
     public $filtro_codigo_puro = null;
     public $filtro_codigo_empaque = null;
@@ -202,6 +224,28 @@ class Produccion extends Component
 
             $this->infoEmpaque();
             $this->obtenerImagenesHistorial($id_pedido);
+
+            // Cargar ficha técnica si existe para este pedido
+            $ficha = DB::table('ficha_produccion')->where('id_pedido', $id_pedido)->first();
+            if ($ficha) {
+                $this->grado_fortaleza  = $ficha->grado_fortaleza  ?? '';
+                $this->detalle_bonchado = $ficha->detalle_bonchado ?? '';
+                $this->detalle_rolado   = $ficha->detalle_rolado   ?? '';
+                $this->tiro             = $ficha->tiro             ?? '';
+                $this->ligas_produccion = $ficha->ligas_produccion
+                    ? json_decode($ficha->ligas_produccion, true)
+                    : $this->ligas_produccion;
+                $this->norma_capa_onz   = $ficha->norma_capa_onz   ?? '';
+                $this->norma_capa_lbs   = $ficha->norma_capa_lbs   ?? '';
+                $this->norma_banda_onz  = $ficha->norma_banda_onz  ?? '';
+                $this->norma_banda_lbs  = $ficha->norma_banda_lbs  ?? '';
+                $this->norma_tripa_onz  = $ficha->norma_tripa_onz  ?? '';
+                $this->norma_tripa_lbs  = $ficha->norma_tripa_lbs  ?? '';
+                $this->peso_millar_lbs  = $ficha->peso_millar_lbs  ?? '';
+                $this->peso_unidad_gr   = $ficha->peso_unidad_gr   ?? '';
+                $this->peso_cien_onz    = $ficha->peso_cien_onz    ?? '';
+            }
+
             $this->dispatch('show-edit-modal');
         } else {
             Log::error("Pedido no encontrado con ID: " . $id_pedido);
@@ -342,6 +386,43 @@ class Produccion extends Component
 
             DB::commit();
 
+            // Guardar/actualizar ficha técnica (tabla separada, NO afecta historial_imagenes)
+            $fichaData = [
+                'grado_fortaleza'  => $this->grado_fortaleza  ?: null,
+                'detalle_bonchado' => $this->detalle_bonchado ?: null,
+                'detalle_rolado'   => $this->detalle_rolado   ?: null,
+                'tiro'             => $this->tiro             ?: null,
+                'ligas_produccion' => !empty($this->ligas_produccion)
+                    ? json_encode($this->ligas_produccion, JSON_UNESCAPED_UNICODE)
+                    : null,
+                'norma_capa_onz'   => $this->norma_capa_onz   ?: null,
+                'norma_capa_lbs'   => $this->norma_capa_lbs   ?: null,
+                'norma_banda_onz'  => $this->norma_banda_onz  ?: null,
+                'norma_banda_lbs'  => $this->norma_banda_lbs  ?: null,
+                'norma_tripa_onz'  => $this->norma_tripa_onz  ?: null,
+                'norma_tripa_lbs'  => $this->norma_tripa_lbs  ?: null,
+                'peso_millar_lbs'  => $this->peso_millar_lbs  ?: null,
+                'peso_unidad_gr'   => $this->peso_unidad_gr   ?: null,
+                'peso_cien_onz'    => $this->peso_cien_onz    ?: null,
+                'updated_at'       => now(),
+            ];
+
+            $fichaExistente = DB::table('ficha_produccion')
+                ->where('id_pedido', $this->id_pedido)
+                ->first();
+
+            if ($fichaExistente) {
+                DB::table('ficha_produccion')
+                    ->where('id_pedido', $this->id_pedido)
+                    ->update($fichaData);
+            } else {
+                DB::table('ficha_produccion')
+                    ->insert(array_merge($fichaData, [
+                        'id_pedido'  => $this->id_pedido,
+                        'created_at' => now(),
+                    ]));
+            }
+
             $this->dispatch('swal', json_encode([
                 'title' => 'Éxito',
                 'text' => 'Pedido actualizado correctamente.',
@@ -350,21 +431,15 @@ class Produccion extends Component
 
             $this->dispatch('hide-edit-modal');
             $this->reset([
-                'id_pedido',
-                'id_cliente',
-                'id_puro',
-                'clientes',
-                'id_empaque',
-                'codigo_puro',
-                'codigo_empaque',
-                'presentacion_puro',
-                'marca',
-                'alias_vitola',
-                'vitola',
-                'capa',
-                'descripcion_produccion',
-                'imagen_produccion',
-                'error_puro'
+                'id_pedido', 'id_cliente', 'id_puro', 'clientes',
+                'id_empaque', 'codigo_puro', 'codigo_empaque',
+                'presentacion_puro', 'marca', 'alias_vitola', 'vitola', 'capa',
+                'descripcion_produccion', 'imagen_produccion', 'error_puro',
+                // Ficha técnica
+                'grado_fortaleza', 'detalle_bonchado', 'detalle_rolado', 'tiro',
+                'ligas_produccion', 'norma_capa_onz', 'norma_capa_lbs',
+                'norma_banda_onz', 'norma_banda_lbs', 'norma_tripa_onz', 'norma_tripa_lbs',
+                'peso_millar_lbs', 'peso_unidad_gr', 'peso_cien_onz',
             ]);
 
             $this->dispatch('reset-select-cliente');
@@ -399,38 +474,37 @@ class Produccion extends Component
         }
     }
 
+    public function agregarFila(): void
+    {
+        $this->ligas_produccion[] = ['calidad' => '', 'variedad' => '', 'liga' => '', 'porcentaje' => ''];
+    }
+
+    public function quitarFila(): void
+    {
+        if (count($this->ligas_produccion) > 1) {
+            array_pop($this->ligas_produccion);
+        }
+    }
+
     public function closeEmpaqueModal()
     {
         $this->dispatch('hide-edit-modal');
 
         $this->reset([
-            'id_pedido',
-            'id_cliente',
-            'id_puro',
-            'clientes',
-            'id_empaque',
-            'codigo_puro',
-            'codigo_empaque',
-            'presentacion_puro',
-            'marca',
-            'alias_vitola',
-            'vitola',
-            'capa',
-
+            'id_pedido', 'id_cliente', 'id_puro', 'clientes',
+            'id_empaque', 'codigo_puro', 'codigo_empaque',
+            'presentacion_puro', 'marca', 'alias_vitola', 'vitola', 'capa',
             'descripcion_produccion',
-            'imagen_produccion',
-            'imagen_anillado',
-            'imagen_caja',
-            'imagen_produccion_existentes',
-            'imagen_anillado_existentes',
-            'imagen_caja_existentes',
-            'imagen_produccion_nuevas',
-            'imagen_anillado_nuevas',
-            'imagen_caja_nuevas',
-            'imagenProduccionActual',
-            'imagenAnilladoActual',
-            'imagenCajaActual',
-            'error_puro'
+            'imagen_produccion', 'imagen_anillado', 'imagen_caja',
+            'imagen_produccion_existentes', 'imagen_anillado_existentes', 'imagen_caja_existentes',
+            'imagen_produccion_nuevas', 'imagen_anillado_nuevas', 'imagen_caja_nuevas',
+            'imagenProduccionActual', 'imagenAnilladoActual', 'imagenCajaActual',
+            'error_puro',
+            // Ficha técnica
+            'grado_fortaleza', 'detalle_bonchado', 'detalle_rolado', 'tiro',
+            'ligas_produccion', 'norma_capa_onz', 'norma_capa_lbs',
+            'norma_banda_onz', 'norma_banda_lbs', 'norma_tripa_onz', 'norma_tripa_lbs',
+            'peso_millar_lbs', 'peso_unidad_gr', 'peso_cien_onz',
         ]);
 
         $this->dispatch('reset-select-cliente');
